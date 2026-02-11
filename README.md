@@ -4,7 +4,7 @@
 
 **"Set it and Forget it" Ransomware Protection**
 
-GuardianX catches ransomware attacks in the "micro-damage" phase (first 3-5 files) before mass destruction occurs.
+GuardianX catches ransomware attacks in the "micro-damage" phase before mass destruction occurs.
 
 ---
 
