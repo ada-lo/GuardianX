@@ -17,6 +17,7 @@ import time
 import signal
 import atexit
 from pathlib import Path
+from typing import Optional
 
 logger = logging.getLogger("GuardianX.SelfDefense")
 
@@ -41,16 +42,19 @@ class SelfDefense:
     5. Crash recovery registration
     """
     
-    def __init__(self):
-        self._mutex_handle = None
-        self._watchdog_process = None
-        self._heartbeat_thread = None
-        self._running = False
-        self._is_watchdog_mode = False
-        self._guardian_pid = os.getpid()
+    def __init__(self) -> None:
+        self._mutex_handle: Optional[int] = None
+        self._watchdog_process: Optional[subprocess.Popen[str]] = None
+        self._heartbeat_thread: Optional[threading.Thread] = None
+        self._running: bool = False
+        self._heartbeat_active: bool = False  # Separate flag for heartbeat thread
+        self._deactivated: bool = False       # Guard against double deactivation
+        self._is_watchdog_mode: bool = False
+        self._guardian_pid: int = os.getpid()
         
         # Heartbeat file for watchdog communication
-        self._heartbeat_file = Path(os.getenv('TEMP')) / 'GuardianX' / '.heartbeat'
+        temp_dir = os.getenv('TEMP', os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Temp'))
+        self._heartbeat_file = Path(temp_dir) / 'GuardianX' / '.heartbeat'
         self._heartbeat_file.parent.mkdir(parents=True, exist_ok=True)
         
         logger.info("Self-Defense module initialized")
@@ -82,22 +86,29 @@ class SelfDefense:
     
     def deactivate(self):
         """Cleanly deactivate self-defense (for graceful shutdown)."""
+        if self._deactivated:
+            return  # Already deactivated, prevent double cleanup
+        self._deactivated = True
         self._running = False
+        self._heartbeat_active = False
         
         # Stop watchdog
-        if self._watchdog_process:
+        _wp = self._watchdog_process
+        if _wp is not None:
             try:
-                self._watchdog_process.terminate()
+                _wp.terminate()
             except Exception:
                 pass
+            self._watchdog_process = None
         
         # Release mutex
-        if self._mutex_handle:
+        if self._mutex_handle is not None:
             try:
-                ctypes.windll.kernel32.ReleaseMutex(self._mutex_handle)
-                ctypes.windll.kernel32.CloseHandle(self._mutex_handle)
+                ctypes.windll.kernel32.ReleaseMutex(self._mutex_handle)  # type: ignore[attr-defined]
+                ctypes.windll.kernel32.CloseHandle(self._mutex_handle)  # type: ignore[attr-defined]
             except Exception:
                 pass
+            self._mutex_handle = None
         
         # Clean up heartbeat
         try:
@@ -117,17 +128,17 @@ class SelfDefense:
         try:
             mutex_name = "Global\\GuardianX_SingleInstance_Mutex"
             
-            self._mutex_handle = ctypes.windll.kernel32.CreateMutexW(
+            self._mutex_handle = ctypes.windll.kernel32.CreateMutexW(  # type: ignore[attr-defined]
                 None,                    # Default security
                 ctypes.c_bool(False),    # Not initially owned
                 mutex_name               # Mutex name
             )
             
-            last_error = ctypes.windll.kernel32.GetLastError()
+            last_error = ctypes.windll.kernel32.GetLastError()  # type: ignore[attr-defined]
             
             if last_error == ERROR_ALREADY_EXISTS:
                 logger.warning("GuardianX is already running (mutex exists)")
-                ctypes.windll.kernel32.CloseHandle(self._mutex_handle)
+                ctypes.windll.kernel32.CloseHandle(self._mutex_handle)  # type: ignore[attr-defined]
                 self._mutex_handle = None
                 return False
             
@@ -151,8 +162,8 @@ class SelfDefense:
         """
         try:
             # Set high priority class
-            handle = ctypes.windll.kernel32.GetCurrentProcess()
-            ctypes.windll.kernel32.SetPriorityClass(handle, HIGH_PRIORITY_CLASS)
+            handle = ctypes.windll.kernel32.GetCurrentProcess()  # type: ignore[attr-defined]
+            ctypes.windll.kernel32.SetPriorityClass(handle, HIGH_PRIORITY_CLASS)  # type: ignore[attr-defined]
             logger.info("Process priority elevated to HIGH")
             
         except Exception as e:
@@ -170,10 +181,10 @@ class SelfDefense:
         for non-elevated users.
         """
         try:
-            import win32api
-            import win32security
-            import win32process
-            import ntsecuritycon
+            import win32api  # type: ignore[import-untyped]
+            import win32security  # type: ignore[import-untyped]
+            import win32process  # type: ignore[import-untyped]
+            import ntsecuritycon  # type: ignore[import-untyped]
             
             # Get current process handle
             ph = win32api.GetCurrentProcess()
@@ -217,34 +228,38 @@ class SelfDefense:
         If GuardianX stops updating the heartbeat, the watchdog restarts it.
         """
         try:
-            # Start heartbeat writer thread
-            self._heartbeat_thread = threading.Thread(
+            # Start heartbeat writer with its own flag so it doesn't
+            # depend on _running which may not be set yet
+            self._heartbeat_active = True
+            hbt = threading.Thread(
                 target=self._heartbeat_writer,
                 daemon=True,
                 name="GuardianX-Heartbeat"
             )
-            self._heartbeat_thread.start()
+            self._heartbeat_thread = hbt
+            hbt.start()
             
             # Spawn watchdog process
             python_exe = sys.executable
             main_script = str(Path(__file__).parent / 'main.py')
             
-            # Launch the watchdog as a subprocess
-            self._watchdog_process = subprocess.Popen(
+            CREATE_NO_WINDOW = 0x08000000  # subprocess.CREATE_NO_WINDOW
+            wp = subprocess.Popen(
                 [python_exe, '-c', self._get_watchdog_script()],
-                creationflags=subprocess.CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY_CLASS,
+                creationflags=CREATE_NO_WINDOW | BELOW_NORMAL_PRIORITY_CLASS,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
+            self._watchdog_process = wp
             
-            logger.info(f"Watchdog process started (PID {self._watchdog_process.pid})")
+            logger.info(f"Watchdog process started (PID {wp.pid})")
             
         except Exception as e:
             logger.warning(f"Failed to start watchdog: {e}")
     
     def _heartbeat_writer(self):
         """Write heartbeat timestamp to file every 5 seconds."""
-        while self._running:
+        while self._heartbeat_active:
             try:
                 with open(self._heartbeat_file, 'w') as f:
                     f.write(f"{time.time()}\n{os.getpid()}")
@@ -313,7 +328,7 @@ print("[WATCHDOG] Maximum restart limit reached. Stopping.")
     
     def _register_crash_handler(self):
         """Register cleanup handlers for graceful/crash shutdown."""
-        atexit.register(self.deactivate)
+        atexit.register(self.deactivate)  # type: ignore[arg-type]
         
         try:
             signal.signal(signal.SIGTERM, self._signal_handler)
@@ -327,6 +342,9 @@ print("[WATCHDOG] Maximum restart limit reached. Stopping.")
         """Handle termination signals."""
         logger.info(f"Received signal {signum} — shutting down gracefully")
         self.deactivate()
+        # Re-raise KeyboardInterrupt so the main loop can catch it and exit
+        if signum == signal.SIGINT:
+            raise KeyboardInterrupt
     
     @staticmethod
     def is_watchdog_mode():
@@ -337,13 +355,13 @@ print("[WATCHDOG] Maximum restart limit reached. Stopping.")
     def get_protection_status():
         """Get current self-protection status info."""
         try:
-            is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin()  # type: ignore[attr-defined]
         except Exception:
             is_admin = False
         
         try:
-            import win32api
-            import win32process
+            import win32api  # type: ignore[import-untyped]
+            import win32process  # type: ignore[import-untyped]
             handle = win32api.GetCurrentProcess()
             priority = win32process.GetPriorityClass(handle)
             priority_name = {
@@ -357,7 +375,8 @@ print("[WATCHDOG] Maximum restart limit reached. Stopping.")
         except Exception:
             priority_name = "UNKNOWN"
         
-        heartbeat_file = Path(os.getenv('TEMP')) / 'GuardianX' / '.heartbeat'
+        temp_dir = os.getenv('TEMP', os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'Temp'))
+        heartbeat_file = Path(temp_dir) / 'GuardianX' / '.heartbeat'
         watchdog_alive = False
         if heartbeat_file.exists():
             try:

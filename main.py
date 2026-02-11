@@ -44,9 +44,6 @@ class GuardianXHandler(FileSystemEventHandler):
     def __init__(self, guardian):
         self.guardian = guardian
         super().__init__()
-
-        print("GuardianX USERPROFILE:", os.environ.get("USERPROFILE"))
-
     
     def on_modified(self, event):
         if not event.is_directory:
@@ -86,22 +83,22 @@ class GuardianX:
         
         # ─── Gap 1: ETW-Based Process Attribution ───
         self.etw_monitor = ETWFileMonitor()
-        print(f"[GuardianX] ETW Monitor initialized")
+        print("[GuardianX] ETW Monitor initialized")
         
         # ─── Gap 2: File Recovery Manager ───
         self.recovery = FileRecoveryManager()
-        print(f"[GuardianX] File Recovery Manager ready")
+        print("[GuardianX] File Recovery Manager ready")
         
         # ─── Gap 4: Adaptive Baselines ───
         self.adaptive_baseline = AdaptiveBaseline()
         if self.adaptive_baseline.is_learning:
-            print(f"[GuardianX] Adaptive Baseline: LEARNING MODE (building profiles)")
+            print("[GuardianX] Adaptive Baseline: LEARNING MODE (building profiles)")
         else:
-            print(f"[GuardianX] Adaptive Baseline: ENFORCING MODE")
+            print("[GuardianX] Adaptive Baseline: ENFORCING MODE")
         
         # ─── Gap 5: Evasion Detector ───
         self.evasion_detector = EvasionDetector()
-        print(f"[GuardianX] Evasion Detector active")
+        print("[GuardianX] Evasion Detector active")
         
         # ─── Gap 3: Dashboard Event Bus ───
         self.event_bus = None
@@ -134,8 +131,6 @@ class GuardianX:
     
     def _get_default_watch_paths(self):
         """Get default user directories to monitor"""
-        import os
-        
         user_profile = Path(os.environ.get('USERPROFILE', os.path.expanduser('~')))
         
         paths = [
@@ -215,6 +210,8 @@ class GuardianX:
         if proc_info:
             is_known, threat_name = self.signature_checker.check_process_name(proc_info['name'])
             indicators['is_known_ransomware'] = is_known
+        else:
+            indicators['is_known_ransomware'] = False
         
         # 2. Check for ransom notes
         parent_dir = Path(filepath).parent
@@ -273,10 +270,11 @@ class GuardianX:
         Legacy fallback — used when ETW doesn't have data.
         """
         try:
+            filepath_normalized = os.path.normpath(filepath).lower()
             for proc in psutil.process_iter(['pid', 'name']):
                 try:
                     for item in proc.open_files():
-                        if item.path == filepath:
+                        if os.path.normpath(item.path).lower() == filepath_normalized:
                             return proc.info['pid']
                 except (psutil.AccessDenied, psutil.NoSuchProcess):
                     continue
@@ -328,8 +326,8 @@ class GuardianX:
             print(f"[WARNING] Failed to suspend PID {pid}: {message}")
     
     def _log_event(self, pid, filepath, event_type, action, reason):
-        """Log non-threatening events for analysis"""
-        pass
+        """Log non-threatening events for analysis."""
+        logger.debug(f"Event: pid={pid} file={filepath} type={event_type} action={action} reason={reason}")
     
     def _publish_event(self, pid, filepath, event_type, action, reason):
         """Publish event to the dashboard event bus."""
@@ -473,7 +471,7 @@ def main():
             print("         ▸ ETW kernel tracing requires admin")
             print("         ▸ VSS restore requires admin")
             print("         ▸ DACL protection requires admin")
-    except:
+    except Exception:
         pass
     
     # Activate self-defense

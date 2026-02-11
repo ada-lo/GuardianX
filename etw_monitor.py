@@ -6,6 +6,7 @@ Replaces polling-based process attribution with real-time kernel events.
 Falls back to Sysmon log parsing if ETW session cannot be established.
 """
 
+import sys
 import ctypes
 import ctypes.wintypes
 import threading
@@ -13,8 +14,20 @@ import queue
 import os
 import time
 import logging
+import subprocess
 from collections import defaultdict
 from datetime import datetime, timedelta
+from typing import Optional, DefaultDict, Dict, Tuple, Set, Any
+
+if sys.platform == 'win32':
+    try:
+        import win32evtlog  # type: ignore[import-untyped]
+        import win32event   # type: ignore[import-untyped]
+        import win32api     # type: ignore[import-untyped]
+        import pywintypes    # type: ignore[import-untyped]
+        import psutil        # type: ignore[import-untyped]
+    except ImportError:
+        pass
 
 logger = logging.getLogger("GuardianX.ETW")
 
@@ -68,20 +81,24 @@ class ETWFileMonitor:
     open/close handles, kernel drivers).
     """
     
-    def __init__(self, max_queue_size=10000):
-        self.event_queue = queue.Queue(maxsize=max_queue_size)
-        self._running = False
-        self._thread = None
-        self._etw_active = False
-        self._sysmon_active = False
+    def __init__(self, max_queue_size: int = 10000) -> None:
+        self.event_queue: queue.Queue[FileIOEvent] = queue.Queue(maxsize=max_queue_size)
+        self._running: bool = False
+        self._thread: Optional[threading.Thread] = None
+        self._etw_active: bool = False
+        self._sysmon_active: bool = False
+        
+        # Synchronization events for thread startup
+        self._startup_event = threading.Event()
+        self._startup_error: Optional[str] = None
         
         # Recent file→PID mapping cache (filepath → (pid, timestamp))
-        self._file_pid_cache = {}
+        self._file_pid_cache: Dict[str, Tuple[int, float]] = {}
         self._cache_lock = threading.Lock()
-        self._cache_ttl = 5.0  # seconds
+        self._cache_ttl: float = 5.0  # seconds
         
         # Track file access patterns per PID
-        self.pid_file_map = defaultdict(set)  # pid → set of filepaths
+        self.pid_file_map: DefaultDict[int, Set[str]] = defaultdict(set)  # type: ignore[assignment]
         self._map_lock = threading.Lock()
         
         logger.info("ETW File Monitor initialized")
@@ -93,13 +110,13 @@ class ETWFileMonitor:
         
         self._running = True
         
-        # Try ETW first, fall back to Sysmon
+        # Try ETW first, fall back to Sysmon, then enhanced polling
         if self._try_start_etw():
             self._etw_active = True
-            logger.info("ETW real-time trace session started successfully")
+            logger.info("✓ ETW real-time trace session started successfully")
         elif self._try_start_sysmon():
             self._sysmon_active = True
-            logger.info("Sysmon log monitoring started as fallback")
+            logger.info("✓ Sysmon log monitoring started as fallback")
         else:
             # Final fallback: enhanced psutil polling in a background thread
             self._thread = threading.Thread(
@@ -113,8 +130,9 @@ class ETWFileMonitor:
     def stop(self):
         """Stop the monitoring session."""
         self._running = False
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=5)
+        _t = self._thread
+        if _t is not None and _t.is_alive():
+            _t.join(timeout=5)
         logger.info("ETW File Monitor stopped")
     
     def get_process_for_file(self, filepath):
@@ -135,7 +153,7 @@ class ETWFileMonitor:
                 if time.time() - timestamp < self._cache_ttl:
                     return pid
                 else:
-                    del self._file_pid_cache[filepath_normalized]
+                    self._file_pid_cache.pop(filepath_normalized, None)
         
         # Fallback to psutil scanning
         return self._psutil_scan(filepath)
@@ -157,20 +175,83 @@ class ETWFileMonitor:
     
     # ─── ETW Session Management ───────────────────────────────────────────
     
+    def _try_enable_analytic_channel(self):
+        """
+        Attempt to enable the Microsoft-Windows-Kernel-File/Analytic channel.
+        
+        This channel is DISABLED by default on Windows. Without enabling it,
+        EvtSubscribe will fail with 'channel not found' or 'access denied'.
+        Requires administrator privileges.
+        
+        Returns True if the channel was enabled or already enabled.
+        """
+        try:
+            result = subprocess.run(
+                [
+                    'wevtutil', 'set-log',
+                    'Microsoft-Windows-Kernel-File/Analytic',
+                    '/enabled:true', '/quiet:true'
+                ],
+                capture_output=True, text=True, timeout=10
+            )
+            
+            if result.returncode == 0:
+                logger.info("Enabled Microsoft-Windows-Kernel-File/Analytic channel")
+                return True
+            else:
+                # Check if already enabled
+                check = subprocess.run(
+                    [
+                        'wevtutil', 'get-log',
+                        'Microsoft-Windows-Kernel-File/Analytic'
+                    ],
+                    capture_output=True, text=True, timeout=10
+                )
+                if check.returncode == 0 and 'enabled: true' in check.stdout.lower():
+                    logger.info("Kernel-File/Analytic channel is already enabled")
+                    return True
+                
+                logger.warning(
+                    f"Could not enable Kernel-File/Analytic channel: "
+                    f"{result.stderr.strip() or result.stdout.strip()}"
+                )
+                return False
+                
+        except FileNotFoundError:
+            logger.warning("wevtutil not found — cannot enable analytic channel")
+            return False
+        except subprocess.TimeoutExpired:
+            logger.warning("Timeout enabling analytic channel")
+            return False
+        except Exception as e:
+            logger.warning(f"Failed to enable analytic channel: {e}")
+            return False
+    
     def _try_start_etw(self):
         """
         Attempt to start an ETW trace session for kernel file events.
         
-        Uses ctypes to call the Windows ETW API directly:
-        - StartTrace → creates the trace session
-        - EnableTraceEx2 → enables the Kernel-File provider
-        - OpenTrace + ProcessTrace → consumes events in real-time
+        Uses win32evtlog.EvtSubscribe to subscribe to the
+        Microsoft-Windows-Kernel-File/Analytic channel.
+        Requires administrator privileges.
         """
         try:
             # Check if we have admin privileges (ETW requires elevation)
             if not ctypes.windll.shell32.IsUserAnAdmin():
-                logger.warning("ETW requires administrator privileges")
+                logger.warning("ETW requires administrator privileges — skipping")
                 return False
+            
+            # Ensure the analytic channel is enabled
+            if not self._try_enable_analytic_channel():
+                logger.warning(
+                    "Kernel-File/Analytic channel could not be enabled — "
+                    "ETW subscription will not work"
+                )
+                return False
+            
+            # Reset startup synchronization
+            self._startup_event.clear()
+            self._startup_error = None
             
             # Start ETW consumer thread
             self._thread = threading.Thread(
@@ -180,8 +261,16 @@ class ETWFileMonitor:
             )
             self._thread.start()
             
-            # Give it a moment to initialize
-            time.sleep(0.5)
+            # Wait for the thread to signal success or failure (up to 5 seconds)
+            if not self._startup_event.wait(timeout=5.0):
+                logger.error("ETW consumer thread did not start within 5 seconds")
+                self._running = False
+                return False
+            
+            if self._startup_error:
+                logger.error(f"ETW consumer startup failed: {self._startup_error}")
+                return False
+            
             return self._etw_active
             
         except Exception as e:
@@ -198,15 +287,25 @@ class ETWFileMonitor:
         Note: The Kernel-File/Analytic channel must be explicitly enabled in Windows.
         If it's not enabled, this will fail and fall back to Sysmon or polling.
         """
+        handle = None
+        signal_event = None
         try:
             import win32evtlog
             import win32event
             
-            # Create a signal event for EvtSubscribe → EvtNext pattern
+            WAIT_OBJECT_0 = 0x00000000
+            
+            # Create a Win32 auto-reset event using pywin32.
+            # This returns a PyHANDLE which EvtSubscribe requires.
             signal_event = win32event.CreateEvent(None, False, False, None)
+            if not signal_event:
+                self._startup_error = "CreateEvent failed"
+                self._startup_event.set()
+                return
             
             # Subscribe to Microsoft-Windows-Kernel-File/Analytic channel
             # This provides real-time file I/O events with PID attribution
+            channel = 'Microsoft-Windows-Kernel-File/Analytic'
             query = (
                 '<QueryList>'
                 '  <Query Id="0" Path="Microsoft-Windows-Kernel-File/Analytic">'
@@ -217,44 +316,65 @@ class ETWFileMonitor:
                 '</QueryList>'
             )
             
-            # EvtSubscribe params: Session, SignalEvent, ChannelPath, Query,
-            #                      Bookmark, Context, Callback, Flags
-            handle = win32evtlog.EvtSubscribe(
-                None,                                           # Session (local)
-                signal_event,                                   # SignalEvent
-                'Microsoft-Windows-Kernel-File/Analytic',       # ChannelPath
-                query,                                          # Query
-                None,                                           # Bookmark
-                None,                                           # Context
-                None,                                           # Callback (poll via signal)
-                win32evtlog.EvtSubscribeToFutureEvents,         # Flags
-            )
+            try:
+                handle = win32evtlog.EvtSubscribe(
+                    None,                                           # Session (local)
+                    signal_event,                                   # SignalEvent (PyHANDLE)
+                    channel,                                        # ChannelPath
+                    query,                                          # Query
+                    None,                                           # Bookmark
+                    None,                                           # Context
+                    None,                                           # Callback (poll via signal)
+                    win32evtlog.EvtSubscribeToFutureEvents,         # Flags
+                )
+            except Exception as e:
+                self._startup_error = f"EvtSubscribe failed on '{channel}': {e}"
+                self._startup_event.set()
+                return
             
             self._etw_active = True
-            logger.info("ETW subscription active on Kernel-File provider")
+            self._startup_event.set()  # Signal success to the main thread
+            logger.info("ETW subscription active on Kernel-File/Analytic")
             
             while self._running:
-                # Wait for the signal event (max 1 second, then re-check _running)
                 wait_result = win32event.WaitForSingleObject(signal_event, 1000)
                 
-                if wait_result == win32event.WAIT_OBJECT_0:
-                    # Events are available — drain them
+                if wait_result == WAIT_OBJECT_0:
                     while True:
                         try:
                             events = win32evtlog.EvtNext(handle, 100, 100)
+                        except pywintypes.error:
+                            # No more events or handle error
+                            break
                         except Exception:
                             break
                         if not events:
                             break
                         for event in events:
                             self._process_etw_event(event)
-                    
+            
         except ImportError:
-            logger.warning("win32evtlog not available for ETW subscription")
+            self._startup_error = "win32evtlog/win32event not available for ETW subscription"
+            logger.warning(self._startup_error)
             self._etw_active = False
         except Exception as e:
+            self._startup_error = str(e)
             logger.error(f"ETW consumer error: {e}")
             self._etw_active = False
+        finally:
+            # Signal the startup event in case we failed before signaling
+            self._startup_event.set()
+            # Clean up handles
+            if signal_event is not None:
+                try:
+                    win32api.CloseHandle(signal_event)
+                except Exception:
+                    pass
+            if handle is not None:
+                try:
+                    win32evtlog.EvtClose(handle)
+                except Exception:
+                    pass
     
     def _process_etw_event(self, event):
         """Parse an ETW event and add to the queue."""
@@ -269,7 +389,7 @@ class ETWFileMonitor:
             
             # Extract PID from System/Execution
             execution = root.find('.//e:Execution', ns)
-            pid = int(execution.get('ProcessID', '0')) if execution is not None else 0
+            pid = int(execution.get('ProcessID', '0') or '0') if execution is not None else 0
             
             # Extract filepath from EventData
             event_data = root.find('.//e:EventData', ns)
@@ -282,7 +402,7 @@ class ETWFileMonitor:
             
             if filepath and pid:
                 event_id_elem = root.find('.//e:EventID', ns)
-                event_id = int(event_id_elem.text) if event_id_elem is not None else 0
+                event_id = int(event_id_elem.text or '0') if event_id_elem is not None else 0
                 
                 event_type_map = {
                     FILE_CREATE: 'created',
@@ -323,17 +443,25 @@ class ETWFileMonitor:
             import win32evtlog
             
             # Check if Sysmon log exists using the modern Event Log API
+            channel = 'Microsoft-Windows-Sysmon/Operational'
             try:
                 test_query = win32evtlog.EvtQuery(
-                    'Microsoft-Windows-Sysmon/Operational',
+                    channel,
                     win32evtlog.EvtQueryForwardDirection,
                     '*[System[EventID=1]]',
-                    None
                 )
                 # If we get here, Sysmon channel is accessible
-            except Exception:
-                logger.info("Sysmon not installed or not accessible")
+                logger.info(f"Sysmon channel '{channel}' is accessible")
+            except pywintypes.error as e:
+                logger.info(f"Sysmon not installed or not accessible: {e}")
                 return False
+            except Exception as e:
+                logger.info(f"Sysmon channel check failed: {e}")
+                return False
+            
+            # Reset startup synchronization
+            self._startup_event.clear()
+            self._startup_error = None
             
             self._thread = threading.Thread(
                 target=self._sysmon_consumer_loop,
@@ -342,10 +470,19 @@ class ETWFileMonitor:
             )
             self._thread.start()
             
-            time.sleep(0.3)
+            # Wait for the thread to signal success or failure (up to 3 seconds)
+            if not self._startup_event.wait(timeout=3.0):
+                logger.error("Sysmon consumer thread did not start within 3 seconds")
+                return False
+            
+            if self._startup_error:
+                logger.error(f"Sysmon consumer startup failed: {self._startup_error}")
+                return False
+            
             return self._sysmon_active
             
         except ImportError:
+            logger.warning("win32evtlog not available — Sysmon monitoring not possible")
             return False
         except Exception as e:
             logger.error(f"Failed to start Sysmon monitoring: {e}")
@@ -353,14 +490,23 @@ class ETWFileMonitor:
     
     def _sysmon_consumer_loop(self):
         """Poll Sysmon event log for file creation/deletion events."""
+        handle = None
+        signal_event = None
         try:
             import win32evtlog
             import win32event
-            import xml.etree.ElementTree as ET
             
-            # Create a signal event for EvtSubscribe → EvtNext pattern
+            WAIT_OBJECT_0 = 0x00000000
+            
+            # Create a Win32 auto-reset event using pywin32.
+            # This returns a PyHANDLE which EvtSubscribe requires.
             signal_event = win32event.CreateEvent(None, False, False, None)
+            if not signal_event:
+                self._startup_error = "CreateEvent failed"
+                self._startup_event.set()
+                return
             
+            channel = 'Microsoft-Windows-Sysmon/Operational'
             query = (
                 '<QueryList>'
                 '  <Query Id="0" Path="Microsoft-Windows-Sysmon/Operational">'
@@ -371,40 +517,60 @@ class ETWFileMonitor:
                 '</QueryList>'
             )
             
-            # EvtSubscribe params: Session, SignalEvent, ChannelPath, Query,
-            #                      Bookmark, Context, Callback, Flags
-            handle = win32evtlog.EvtSubscribe(
-                None,                                           # Session
-                signal_event,                                   # SignalEvent
-                'Microsoft-Windows-Sysmon/Operational',         # ChannelPath
-                query,                                          # Query
-                None,                                           # Bookmark
-                None,                                           # Context
-                None,                                           # Callback
-                win32evtlog.EvtSubscribeToFutureEvents,         # Flags
-            )
+            try:
+                handle = win32evtlog.EvtSubscribe(
+                    None,                                           # Session
+                    signal_event,                                   # SignalEvent (PyHANDLE)
+                    channel,                                        # ChannelPath
+                    query,                                          # Query
+                    None,                                           # Bookmark
+                    None,                                           # Context
+                    None,                                           # Callback
+                    win32evtlog.EvtSubscribeToFutureEvents,         # Flags
+                )
+            except Exception as e:
+                self._startup_error = f"EvtSubscribe failed on '{channel}': {e}"
+                self._startup_event.set()
+                return
             
             self._sysmon_active = True
+            self._startup_event.set()  # Signal success to the main thread
             logger.info("Sysmon subscription active")
             
             while self._running:
-                # Wait for the signal event (max 2 seconds, then re-check _running)
                 wait_result = win32event.WaitForSingleObject(signal_event, 2000)
                 
-                if wait_result == win32event.WAIT_OBJECT_0:
+                if wait_result == WAIT_OBJECT_0:
                     while True:
                         try:
                             events = win32evtlog.EvtNext(handle, 50, 100)
+                        except pywintypes.error:
+                            break
                         except Exception:
                             break
                         if not events:
                             break
                         for event in events:
                             self._process_sysmon_event(event)
-                    
+            
         except Exception as e:
+            self._startup_error = str(e)
             logger.error(f"Sysmon consumer error: {e}")
             self._sysmon_active = False
+        finally:
+            # Signal the startup event in case we failed before signaling
+            self._startup_event.set()
+            # Clean up handles
+            if signal_event is not None:
+                try:
+                    win32api.CloseHandle(signal_event)
+                except Exception:
+                    pass
+            if handle is not None:
+                try:
+                    win32evtlog.EvtClose(handle)
+                except Exception:
+                    pass
     
     def _process_sysmon_event(self, event):
         """Parse a Sysmon event for file operations."""
@@ -427,12 +593,13 @@ class ETWFileMonitor:
                 if name:
                     data_dict[name] = data.text
             
-            pid = int(data_dict.get('ProcessId', '0'))
+            pid_str = data_dict.get('ProcessId')
+            pid = int(pid_str) if pid_str else 0
             filepath = data_dict.get('TargetFilename', '')
             process_name = data_dict.get('Image', '')
             
             event_id_elem = root.find('.//e:EventID', ns)
-            event_id = int(event_id_elem.text) if event_id_elem is not None else 0
+            event_id = int(event_id_elem.text or '0') if event_id_elem is not None else 0
             
             event_type_map = {
                 SYSMON_FILE_CREATE: 'created',
@@ -474,9 +641,9 @@ class ETWFileMonitor:
         
         while self._running:
             try:
-                import psutil
-                
                 for proc in psutil.process_iter(['pid', 'name']):
+                    if not self._running:
+                        return
                     try:
                         pid = proc.info['pid']
                         open_files = proc.open_files()
@@ -512,8 +679,6 @@ class ETWFileMonitor:
     def _psutil_scan(self, filepath):
         """Legacy psutil-based process scan (used as cache miss fallback)."""
         try:
-            import psutil
-            
             filepath_normalized = os.path.normpath(filepath).lower()
             
             for proc in psutil.process_iter(['pid', 'name']):
@@ -539,7 +704,7 @@ class ETWFileMonitor:
                 if now - ts > max_age
             ]
             for k in stale_keys:
-                del self._file_pid_cache[k]
+                self._file_pid_cache.pop(k, None)
     
     @property
     def is_etw_active(self):

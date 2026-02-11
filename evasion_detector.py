@@ -152,7 +152,6 @@ class EvasionDetector:
             logger.debug(f"Evasion analysis error for PID {pid}: {e}")
         
         # Cache result
-        import time as _time
         self._analysis_cache[pid] = (result, _time.time())
         
         return result
