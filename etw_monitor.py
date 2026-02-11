@@ -229,10 +229,10 @@ class ETWFileMonitor:
     
     def _try_start_etw(self):
         """
-        Attempt to start an ETW trace session for kernel file events.
+        Attempt to start ETW monitoring for kernel file events.
         
-        Uses win32evtlog.EvtSubscribe to subscribe to the
-        Microsoft-Windows-Kernel-File/Analytic channel.
+        Uses EvtQuery + EvtNext polling on the Kernel-File/Analytic channel.
+        Analytic channels do NOT support EvtSubscribe, so we poll instead.
         Requires administrator privileges.
         """
         try:
@@ -245,8 +245,22 @@ class ETWFileMonitor:
             if not self._try_enable_analytic_channel():
                 logger.warning(
                     "Kernel-File/Analytic channel could not be enabled — "
-                    "ETW subscription will not work"
+                    "ETW monitoring will not work"
                 )
+                return False
+            
+            # Verify the channel is queryable before starting the thread
+            try:
+                import win32evtlog
+                test_handle = win32evtlog.EvtQuery(
+                    'Microsoft-Windows-Kernel-File/Analytic',
+                    win32evtlog.EvtQueryForwardDirection,
+                    '*[System[EventID=10]]',
+                )
+                test_handle.Close()
+                logger.info("Kernel-File/Analytic channel is queryable")
+            except Exception as e:
+                logger.warning(f"Kernel-File/Analytic channel not queryable: {e}")
                 return False
             
             # Reset startup synchronization
@@ -279,82 +293,66 @@ class ETWFileMonitor:
     
     def _etw_consumer_loop(self):
         """
-        ETW event consumer loop.
+        ETW event consumer loop using EvtQuery + EvtNext polling.
         
-        Uses win32evtlog to subscribe to kernel file events in real-time.
-        Uses a Win32 signal event so EvtNext works correctly with EvtSubscribe.
+        Analytic channels (like Kernel-File/Analytic) do NOT support
+        EvtSubscribe — they return ERROR_NOT_SUPPORTED (50).
         
-        Note: The Kernel-File/Analytic channel must be explicitly enabled in Windows.
-        If it's not enabled, this will fail and fall back to Sysmon or polling.
+        Instead, we use EvtQuery to open the channel, skip to the end
+        of existing events, and then poll for new events via EvtNext.
+        All event parsing is done in Python using XML.
         """
-        handle = None
-        signal_event = None
+        query_handle = None
         try:
             import win32evtlog
-            import win32event
             
-            WAIT_OBJECT_0 = 0x00000000
-            
-            # Create a Win32 auto-reset event using pywin32.
-            # This returns a PyHANDLE which EvtSubscribe requires.
-            signal_event = win32event.CreateEvent(None, False, False, None)
-            if not signal_event:
-                self._startup_error = "CreateEvent failed"
-                self._startup_event.set()
-                return
-            
-            # Subscribe to Microsoft-Windows-Kernel-File/Analytic channel
-            # This provides real-time file I/O events with PID attribution
             channel = 'Microsoft-Windows-Kernel-File/Analytic'
-            query = (
-                '<QueryList>'
-                '  <Query Id="0" Path="Microsoft-Windows-Kernel-File/Analytic">'
-                '    <Select Path="Microsoft-Windows-Kernel-File/Analytic">'
-                '      *[System[(EventID=10 or EventID=12 or EventID=14 or EventID=15 or EventID=26)]]'
-                '    </Select>'
-                '  </Query>'
-                '</QueryList>'
+            query_str = '*[System[(EventID=10 or EventID=12 or EventID=14 or EventID=15 or EventID=26)]]'
+            
+            # Open a forward query on the Analytic channel
+            query_handle = win32evtlog.EvtQuery(
+                channel,
+                win32evtlog.EvtQueryForwardDirection,
+                query_str,
             )
             
-            try:
-                handle = win32evtlog.EvtSubscribe(
-                    None,                                           # Session (local)
-                    signal_event,                                   # SignalEvent (PyHANDLE)
-                    channel,                                        # ChannelPath
-                    query,                                          # Query
-                    None,                                           # Bookmark
-                    None,                                           # Context
-                    None,                                           # Callback (poll via signal)
-                    win32evtlog.EvtSubscribeToFutureEvents,         # Flags
-                )
-            except Exception as e:
-                self._startup_error = f"EvtSubscribe failed on '{channel}': {e}"
-                self._startup_event.set()
-                return
+            # Skip all existing events — we only want new ones going forward
+            skipped = 0
+            while True:
+                try:
+                    old_events = win32evtlog.EvtNext(query_handle, 1000, 100)
+                    if not old_events:
+                        break
+                    skipped += len(old_events)
+                except pywintypes.error:
+                    break
+                except Exception:
+                    break
+            
+            if skipped:
+                logger.info(f"Skipped {skipped} existing ETW events")
             
             self._etw_active = True
             self._startup_event.set()  # Signal success to the main thread
-            logger.info("ETW subscription active on Kernel-File/Analytic")
+            logger.info("ETW query polling active on Kernel-File/Analytic")
             
+            # Poll for new events
             while self._running:
-                wait_result = win32event.WaitForSingleObject(signal_event, 1000)
-                
-                if wait_result == WAIT_OBJECT_0:
-                    while True:
-                        try:
-                            events = win32evtlog.EvtNext(handle, 100, 100)
-                        except pywintypes.error:
-                            # No more events or handle error
-                            break
-                        except Exception:
-                            break
-                        if not events:
-                            break
+                try:
+                    events = win32evtlog.EvtNext(query_handle, 100, 200)
+                    if events:
                         for event in events:
                             self._process_etw_event(event)
+                    else:
+                        time.sleep(0.1)  # No events, brief sleep
+                except pywintypes.error:
+                    time.sleep(0.2)  # Transient error, retry
+                except Exception as e:
+                    logger.debug(f"ETW poll error: {e}")
+                    time.sleep(0.5)
             
         except ImportError:
-            self._startup_error = "win32evtlog/win32event not available for ETW subscription"
+            self._startup_error = "win32evtlog not available for ETW monitoring"
             logger.warning(self._startup_error)
             self._etw_active = False
         except Exception as e:
@@ -364,15 +362,10 @@ class ETWFileMonitor:
         finally:
             # Signal the startup event in case we failed before signaling
             self._startup_event.set()
-            # Clean up handles
-            if signal_event is not None:
+            # Clean up query handle
+            if query_handle is not None:
                 try:
-                    win32api.CloseHandle(signal_event)
-                except Exception:
-                    pass
-            if handle is not None:
-                try:
-                    win32evtlog.EvtClose(handle)
+                    query_handle.Close()
                 except Exception:
                     pass
     
@@ -518,15 +511,13 @@ class ETWFileMonitor:
             )
             
             try:
+                # pywin32 EvtSubscribe parameter order (different from C API!):
+                # (ChannelPath, Flags, SignalEvent, Callback, Context, Query, Session, Bookmark)
                 handle = win32evtlog.EvtSubscribe(
-                    None,                                           # Session
-                    signal_event,                                   # SignalEvent (PyHANDLE)
                     channel,                                        # ChannelPath
-                    query,                                          # Query
-                    None,                                           # Bookmark
-                    None,                                           # Context
-                    None,                                           # Callback
                     win32evtlog.EvtSubscribeToFutureEvents,         # Flags
+                    SignalEvent=int(signal_event),                   # SignalEvent (int handle)
+                    Query=query,                                    # Query (structured XML)
                 )
             except Exception as e:
                 self._startup_error = f"EvtSubscribe failed on '{channel}': {e}"
@@ -568,7 +559,7 @@ class ETWFileMonitor:
                     pass
             if handle is not None:
                 try:
-                    win32evtlog.EvtClose(handle)
+                    handle.Close()
                 except Exception:
                     pass
     
