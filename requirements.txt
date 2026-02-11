@@ -1,0 +1,18 @@
+# GuardianX Requirements
+# Install with: pip install -r requirements.txt
+
+# File system monitoring
+watchdog>=3.0.0
+
+# Process management
+psutil>=5.9.0
+
+# Windows API access
+pywin32>=305  # For process termination, signature checking, window detection
+
+# Optional: User input monitoring (for idle detection)
+pynput>=1.7.6  # For keyboard/mouse activity tracking
+
+# Testing
+pytest>=7.4.0  # For unit tests
+pytest-cov>=4.1.0  # For coverage reports
