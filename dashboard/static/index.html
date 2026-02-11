@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardianX — Ransomware Defense Dashboard</title>
+    <meta name="description" content="Real-time ransomware detection and response monitoring dashboard for GuardianX defense system.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <!-- ─── Header ─── -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo-icon">GX</div>
+            <div class="header-title">Guardian<span>X</span></div>
+        </div>
+        <div class="header-right">
+            <span class="mode-badge" id="monitoring-mode">Initializing...</span>
+            <div class="status-badge active" id="connection-status">
+                <span class="status-dot"></span>
+                <span id="connection-text">CONNECTED</span>
+            </div>
+            <span class="uptime" id="uptime">00:00:00</span>
+        </div>
+    </header>
+
+    <!-- ─── Main Content ─── -->
+    <main class="main">
+
+        <!-- System Info Bar -->
+        <div class="system-bar">
+            <div class="system-bar-item">
+                <span>🛡️</span>
+                <strong>GuardianX v2.0</strong>
+            </div>
+            <div class="system-bar-divider"></div>
+            <div class="system-bar-item">
+                <span>📡</span>
+                Monitoring Mode: <strong id="sys-mode">—</strong>
+            </div>
+            <div class="system-bar-divider"></div>
+            <div class="system-bar-item">
+                <span>⏱️</span>
+                Uptime: <strong id="sys-uptime">—</strong>
+            </div>
+            <div class="system-bar-divider"></div>
+            <div class="system-bar-item">
+                <span>🔌</span>
+                WebSocket: <strong id="sys-ws">Connecting...</strong>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card" id="card-events">
+                <div class="stat-label">Events Processed</div>
+                <div class="stat-value cyan" id="stat-events">0</div>
+                <div class="stat-sub">Total file system events</div>
+            </div>
+            <div class="stat-card" id="card-threats">
+                <div class="stat-label">Threats Detected</div>
+                <div class="stat-value red" id="stat-threats">0</div>
+                <div class="stat-sub">Ransomware indicators found</div>
+            </div>
+            <div class="stat-card" id="card-killed">
+                <div class="stat-label">Processes Killed</div>
+                <div class="stat-value amber" id="stat-killed">0</div>
+                <div class="stat-sub">Confirmed threats terminated</div>
+            </div>
+            <div class="stat-card" id="card-suspended">
+                <div class="stat-label">Processes Suspended</div>
+                <div class="stat-value green" id="stat-suspended">0</div>
+                <div class="stat-sub">Awaiting investigation</div>
+            </div>
+        </section>
+
+        <!-- Panels -->
+        <section class="panels-grid">
+
+            <!-- Live Threat Feed -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">🔴</span>
+                        Live Threat Feed
+                    </div>
+                    <span class="panel-badge live">LIVE</span>
+                </div>
+                <div class="panel-body" id="threat-feed">
+                    <div class="empty-state">
+                        <div class="icon">🛡️</div>
+                        <p>No threats detected yet.<br>GuardianX is watching.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">📋</span>
+                        Event Log
+                    </div>
+                    <span class="panel-badge" style="background:var(--accent-cyan-dim);color:var(--accent-cyan);" id="event-count">0 events</span>
+                </div>
+                <div class="panel-body" id="event-log">
+                    <div class="empty-state">
+                        <div class="icon">📡</div>
+                        <p>Waiting for file system events...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Chart -->
+            <div class="panel panel-full">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <span class="icon">📊</span>
+                        Activity Timeline
+                    </div>
+                    <span class="panel-badge" style="background:var(--accent-purple);background:hsla(265,60%,30%,0.5);color:hsl(265,70%,70%);">24H</span>
+                </div>
+                <div class="chart-container">
+                    <canvas id="timeline-chart"></canvas>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

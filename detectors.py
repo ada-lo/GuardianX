@@ -34,9 +34,13 @@ class SlowBurnDetector:
         
         self.process_events[pid].append((now, filepath))
         
-    def check_threshold(self, pid, is_user_idle=False):
+    def check_threshold(self, pid, is_user_idle=False, dynamic_threshold=None):
         """
         Check if process exceeds modification threshold.
+        
+        dynamic_threshold: If provided (from AdaptiveBaseline), overrides
+                          the static SLOW_BURN_THRESHOLD from config.
+        
         Returns (is_suspicious, count, window_size)
         """
         if pid not in self.process_events:
@@ -51,10 +55,13 @@ class SlowBurnDetector:
         
         count = len(events)
         
+        # Use adaptive threshold if provided, else static
+        base_threshold = dynamic_threshold if dynamic_threshold is not None else SLOW_BURN_THRESHOLD
+        
         # Adjust threshold based on user activity
-        threshold = SLOW_BURN_THRESHOLD
+        threshold = base_threshold
         if is_user_idle:
-            threshold = int(SLOW_BURN_THRESHOLD * IDLE_PARANOIA_MULTIPLIER)
+            threshold = int(base_threshold * IDLE_PARANOIA_MULTIPLIER)
         
         return count >= threshold, count, SLOW_BURN_WINDOW
     

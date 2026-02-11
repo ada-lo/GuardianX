@@ -126,6 +126,9 @@ class ProcessManager:
             'is_user_idle': bool,
             'ransom_notes_found': list,
             'suspicious_extensions': list,
+            'evasion_score': float,           # Gap 5
+            'evasion_indicators': list,       # Gap 5
+            'evasion_override_whitelist': bool # Gap 5
         }
         
         Returns (action, reason)
@@ -135,9 +138,23 @@ class ProcessManager:
         if not info:
             return ThreatLevel.ALLOW, "Process no longer exists"
         
-        # === STEP 1: Check Whitelist ===
-        if info['is_whitelisted']:
+        # ─── Gap 5: Check evasion BEFORE whitelist ───
+        evasion_score = threat_indicators.get('evasion_score', 0.0)
+        evasion_override = threat_indicators.get('evasion_override_whitelist', False)
+        
+        # Critical evasion detected (shadow copy deletion, process masquerade)
+        if evasion_score >= 0.8:
+            indicators = threat_indicators.get('evasion_indicators', [])
+            reason = f"CRITICAL EVASION (score={evasion_score:.2f}): {'; '.join(indicators[:3])}"
+            return ThreatLevel.KILL, reason
+        
+        # === STEP 1: Check Whitelist (can be overridden by evasion) ===
+        if info['is_whitelisted'] and not evasion_override:
             return ThreatLevel.ALLOW, f"Whitelisted: {info['signer'] or info['name']}"
+        elif info['is_whitelisted'] and evasion_override:
+            # Whitelist bypassed by evasion detector
+            indicators = threat_indicators.get('evasion_indicators', [])
+            return ThreatLevel.SUSPEND, f"WHITELIST OVERRIDE — evasion detected: {'; '.join(indicators[:2])}"
         
         # === STEP 2: Check for Known Ransomware Signature ===
         if threat_indicators.get('is_known_ransomware'):
@@ -149,7 +166,9 @@ class ProcessManager:
         
         # === STEP 3: Check if Process Has Visible Window ===
         if info['has_window']:
-            # User is likely aware of this process
+            # User is likely aware of this process — but evasion can override
+            if evasion_score >= 0.5:
+                return ThreatLevel.SUSPEND, f"GUI process with evasion (score={evasion_score:.2f})"
             if threat_indicators.get('has_corrupted_files'):
                 return ThreatLevel.SUSPEND, "GUI process corrupting files (likely false positive)"
             else:
@@ -157,7 +176,6 @@ class ProcessManager:
         
         # === STEP 4: Check Magic Bytes (File Corruption) ===
         if threat_indicators.get('has_corrupted_files'):
-            # File corruption detected, but not known ransomware
             if threat_indicators.get('is_user_idle'):
                 return ThreatLevel.KILL, "File corruption detected while user is IDLE"
             else:
@@ -174,6 +192,11 @@ class ProcessManager:
         if threat_indicators.get('suspicious_extensions'):
             exts = ', '.join(threat_indicators['suspicious_extensions'])
             return ThreatLevel.SUSPEND, f"Suspicious file extensions: {exts}"
+        
+        # === STEP 7: Moderate Evasion Score ===
+        if evasion_score >= 0.4:
+            indicators = threat_indicators.get('evasion_indicators', [])
+            return ThreatLevel.SUSPEND, f"Evasion behavior (score={evasion_score:.2f}): {'; '.join(indicators[:2])}"
         
         # === Default: Allow ===
         return ThreatLevel.ALLOW, "No suspicious activity detected"

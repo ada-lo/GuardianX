@@ -101,8 +101,7 @@ WHITELISTED_PROCESSES = [
     'firefox.exe',
     'notepad.exe',
     'Code.exe',         # VS Code
-    'devenv.exe',       # Visual Studio
-    'python.exe',       # Be careful with this!
+    'devenv.exe',       # Visual Studio   
     'powershell.exe',   # Be careful with this!
 ]
 
@@ -124,3 +123,20 @@ class ThreatLevel:
 # Files with very high entropy (randomness) are likely encrypted
 # Scale: 0 (all same byte) to 8 (perfect randomness)
 HIGH_ENTROPY_THRESHOLD = 7.5
+
+# === ADAPTIVE BASELINE (Gap 4) ===
+BASELINE_LEARNING_HOURS = 24       # Hours to learn normal patterns before enforcing
+BASELINE_EMA_ALPHA = 0.1           # EMA smoothing factor (lower = smoother)
+BASELINE_SIGMA_MULTIPLIER = 3.0    # Standard deviations above mean for threshold
+BASELINE_MIN_SAMPLES = 20          # Minimum samples before baseline is "mature"
+BASELINE_FILE = LOG_DIR / 'baselines.json'
+
+# === FILE BACKUP & RECOVERY (Gap 2) ===
+BACKUP_DIR = Path(os.getenv('TEMP')) / 'GuardianX' / 'backups'
+BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+MAX_BACKUP_SIZE_MB = 500           # Maximum total backup storage
+BACKUP_RETENTION_HOURS = 72        # Keep backups for 3 days
+
+# === DASHBOARD (Gap 3) ===
+DASHBOARD_HOST = "0.0.0.0"
+DASHBOARD_PORT = 9090

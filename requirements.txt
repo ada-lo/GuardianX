@@ -1,4 +1,4 @@
-# GuardianX Requirements
+# GuardianX Requirements v2.0
 # Install with: pip install -r requirements.txt
 
 # File system monitoring
@@ -12,6 +12,10 @@ pywin32>=305  # For process termination, signature checking, window detection
 
 # Optional: User input monitoring (for idle detection)
 pynput>=1.7.6  # For keyboard/mouse activity tracking
+
+# === NEW: Dashboard (Gap 3) ===
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
 
 # Testing
 pytest>=7.4.0  # For unit tests
