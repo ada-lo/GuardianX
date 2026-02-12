@@ -143,7 +143,7 @@ def main():
     delete = input("\nDelete test folder? (yes/no): ")
     if delete.lower() == "yes":
         sim.cleanup()
-
+    time.sleep(5)
 
 if __name__ == "__main__":
     main()
