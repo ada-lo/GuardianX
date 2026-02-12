@@ -15,6 +15,7 @@ from datetime import datetime
 import json
 
 from config import *
+from enforcement_diagnostics import log_enforcement_result
 
 
 class ProcessManager:
@@ -133,10 +134,19 @@ class ProcessManager:
         
         Returns (action, reason)
         """
-        info = self.get_process_info(pid)
+        info = self.get_process_info(pid) if pid is not None else None
         
         if not info:
-            return ThreatLevel.ALLOW, "Process no longer exists"
+            # No process info — still check file-based threat indicators
+            if threat_indicators.get('ransom_notes_found'):
+                notes = ', '.join(threat_indicators['ransom_notes_found'])
+                return ThreatLevel.KILL, f"Ransom notes detected: {notes}"
+            if threat_indicators.get('has_corrupted_files'):
+                return ThreatLevel.SUSPEND, "File corruption detected (unknown process)"
+            if threat_indicators.get('suspicious_extensions'):
+                exts = ', '.join(threat_indicators['suspicious_extensions'])
+                return ThreatLevel.SUSPEND, f"Suspicious extensions from unknown process: {exts}"
+            return ThreatLevel.ALLOW, "Unknown process — no file-based threats"
         
         # ─── Gap 5: Check evasion BEFORE whitelist ───
         evasion_score = threat_indicators.get('evasion_score', 0.0)
@@ -221,10 +231,18 @@ class ProcessManager:
             proc.suspend()
             
             self._log_action('SUSPEND', pid, reason)
+            log_enforcement_result(pid, 'SUSPEND', success=True)
             
             return True, f"Process {pid} suspended: {reason}"
             
+        except psutil.AccessDenied as e:
+            log_enforcement_result(pid, 'SUSPEND', success=False, error=str(e), error_type='AccessDenied')
+            return False, f"Failed to suspend {pid}: Access Denied — run GuardianX as Administrator"
+        except psutil.NoSuchProcess as e:
+            log_enforcement_result(pid, 'SUSPEND', success=False, error=str(e), error_type='NoSuchProcess')
+            return False, f"Failed to suspend {pid}: Process no longer exists"
         except Exception as e:
+            log_enforcement_result(pid, 'SUSPEND', success=False, error=str(e), error_type=type(e).__name__)
             return False, f"Failed to suspend {pid}: {e}"
     
     def resume_process(self, pid):
@@ -267,10 +285,18 @@ class ProcessManager:
             proc.kill()
             
             self._log_action('KILL', pid, reason)
+            log_enforcement_result(pid, 'KILL', success=True)
             
             return True, f"Process {pid} TERMINATED: {reason}"
             
+        except psutil.AccessDenied as e:
+            log_enforcement_result(pid, 'KILL', success=False, error=str(e), error_type='AccessDenied')
+            return False, f"Failed to kill {pid}: Access Denied — run GuardianX as Administrator"
+        except psutil.NoSuchProcess as e:
+            log_enforcement_result(pid, 'KILL', success=False, error=str(e), error_type='NoSuchProcess')
+            return False, f"Failed to kill {pid}: Process no longer exists (exited before enforcement)"
         except Exception as e:
+            log_enforcement_result(pid, 'KILL', success=False, error=str(e), error_type=type(e).__name__)
             return False, f"Failed to kill {pid}: {e}"
     
     def _log_action(self, action, pid, reason):

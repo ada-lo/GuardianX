@@ -26,6 +26,14 @@ from file_recovery import FileRecoveryManager
 from adaptive_baseline import AdaptiveBaseline
 from evasion_detector import EvasionDetector
 from self_defense import SelfDefense
+from enforcement_diagnostics import (
+    check_admin,
+    log_etw_attribution,
+    log_detection_context,
+    log_pre_enforcement,
+    log_enforcement_result,
+    log_race_condition_check,
+)
 
 # Set up logging
 logging.basicConfig(
@@ -43,18 +51,24 @@ class GuardianXHandler(FileSystemEventHandler):
     
     def __init__(self, guardian):
         self.guardian = guardian
+        self._event_count = 0
         super().__init__()
     
     def on_modified(self, event):
         if not event.is_directory:
+            self._event_count += 1
+            if self._event_count <= 5 or self._event_count % 50 == 0:
+                logger.debug(f"File event #{self._event_count}: modified {event.src_path}")
             self.guardian.analyze_file_event(event.src_path, 'modified')
     
     def on_created(self, event):
         if not event.is_directory:
+            self._event_count += 1
             self.guardian.analyze_file_event(event.src_path, 'created')
     
     def on_deleted(self, event):
         if not event.is_directory:
+            self._event_count += 1
             self.guardian.analyze_file_event(event.src_path, 'deleted')
 
 
@@ -166,22 +180,36 @@ class GuardianX:
                 pid = self._get_modifying_process(filepath)
             
             if pid is None:
-                return  # Couldn't determine process
+                log_etw_attribution(filepath)
             
-            # Record event for slow-burn detection
-            self.slow_burn.record_event(pid, filepath)
+            # Even if PID is unknown, run file-based threat checks.
+            # File content analysis (entropy, magic bytes, ransom notes) is the
+            # most important signal — don't drop events just because we can't
+            # attribute a process.
+            
+            # Record event for slow-burn detection (skip if no PID)
+            if pid is not None:
+                self.slow_burn.record_event(pid, filepath)
             
             # ─── Gap 4: Record activity for adaptive baselines ───
-            proc_info = self.process_manager.get_process_info(pid)
-            proc_name = proc_info['name'] if proc_info else None
-            event_count = len(self.slow_burn.process_events.get(pid, []))
-            self.adaptive_baseline.record_activity(pid, event_count, proc_name)
+            proc_info = None
+            proc_name = None
+            if pid is not None:
+                proc_info = self.process_manager.get_process_info(pid)
+                proc_name = proc_info['name'] if proc_info else None
+                event_count = len(self.slow_burn.process_events.get(pid, []))
+                self.adaptive_baseline.record_activity(pid, event_count, proc_name)
             
             # === THREAT ASSESSMENT ===
             threat_indicators = self._assess_threat(pid, filepath, event_type)
             
             # === DECISION TREE ===
             action, reason = self.process_manager.decide_action(pid, threat_indicators)
+            
+            # === ENFORCEMENT DIAGNOSTICS ===
+            if action in (ThreatLevel.KILL, ThreatLevel.SUSPEND):
+                action_name = 'KILL' if action == ThreatLevel.KILL else 'SUSPEND'
+                log_detection_context(filepath, pid, threat_indicators, action_name, reason)
             
             # === TAKE ACTION ===
             if action == ThreatLevel.KILL:
@@ -202,11 +230,14 @@ class GuardianX:
         """
         Run all threat detectors and compile indicators.
         Returns dict of threat indicators.
+        Works even when pid is None (unknown process).
         """
         indicators = {}
         
         # 1. Check for known ransomware signature
-        proc_info = self.process_manager.get_process_info(pid)
+        proc_info = None
+        if pid is not None:
+            proc_info = self.process_manager.get_process_info(pid)
         if proc_info:
             is_known, threat_name = self.signature_checker.check_process_name(proc_info['name'])
             indicators['is_known_ransomware'] = is_known
@@ -234,15 +265,19 @@ class GuardianX:
         # 4. Check file modification rate (slow-burn) — with ADAPTIVE THRESHOLD
         is_user_idle, idle_duration = self.idle_monitor.check_idle_state()
         
-        # ─── Gap 4: Use adaptive threshold instead of hardcoded ───
-        proc_name = proc_info['name'] if proc_info else None
-        dynamic_threshold = self.adaptive_baseline.get_threshold(pid, proc_name)
-        is_suspicious, count, window = self.slow_burn.check_threshold(
-            pid, is_user_idle, dynamic_threshold=dynamic_threshold
-        )
-        indicators['high_file_rate'] = is_suspicious
-        indicators['file_count'] = count
-        indicators['dynamic_threshold'] = dynamic_threshold
+        if pid is not None:
+            proc_name = proc_info['name'] if proc_info else None
+            dynamic_threshold = self.adaptive_baseline.get_threshold(pid, proc_name)
+            is_suspicious, count, window = self.slow_burn.check_threshold(
+                pid, is_user_idle, dynamic_threshold=dynamic_threshold
+            )
+            indicators['high_file_rate'] = is_suspicious
+            indicators['file_count'] = count
+            indicators['dynamic_threshold'] = dynamic_threshold
+        else:
+            indicators['high_file_rate'] = False
+            indicators['file_count'] = 0
+            indicators['dynamic_threshold'] = 0
         
         # 5. Check for suspicious extensions
         is_sus_ext, ext = self.signature_checker.check_suspicious_extension(filepath)
@@ -256,11 +291,16 @@ class GuardianX:
         indicators['idle_duration'] = idle_duration
         indicators['idle_level'] = self.idle_monitor.get_idle_level()
         
-        # ─── Gap 5: Evasion analysis ───
-        evasion_result = self.evasion_detector.get_evasion_score(pid)
-        indicators['evasion_score'] = evasion_result['score']
-        indicators['evasion_indicators'] = evasion_result['indicators']
-        indicators['evasion_override_whitelist'] = evasion_result['should_override_whitelist']
+        # 7. Evasion analysis (skip if no PID)
+        if pid is not None:
+            evasion_result = self.evasion_detector.get_evasion_score(pid)
+            indicators['evasion_score'] = evasion_result['score']
+            indicators['evasion_indicators'] = evasion_result['indicators']
+            indicators['evasion_override_whitelist'] = evasion_result['should_override_whitelist']
+        else:
+            indicators['evasion_score'] = 0.0
+            indicators['evasion_indicators'] = []
+            indicators['evasion_override_whitelist'] = False
         
         return indicators
     
@@ -286,44 +326,64 @@ class GuardianX:
     
     def _handle_kill(self, pid, filepath, reason):
         """Handle KILL decision — terminate and attempt file restore."""
-        success, message = self.process_manager.kill_process(pid, reason)
+        self.stats['threats_detected'] += 1
         
+        if pid is not None:
+            # Race condition check: 500ms delay then re-verify PID
+            still_alive = log_race_condition_check(pid)
+            log_pre_enforcement(pid, 'KILL')
+            if still_alive:
+                success, message = self.process_manager.kill_process(pid, reason)
+            else:
+                success, message = False, f"Process {pid} exited before enforcement could act"
+        else:
+            success, message = False, "No PID to kill (unknown process)"
+        
+        print(f"\n{'='*60}")
         if success:
             self.stats['processes_killed'] += 1
-            self.stats['threats_detected'] += 1
-            
-            print(f"\n{'='*60}")
             print(f"[THREAT NEUTRALIZED] PID {pid}")
-            print(f"File: {filepath}")
-            print(f"Reason: {reason}")
-            
-            # ─── Gap 2: Attempt automatic file restore ───
-            restore_success, restore_msg = self.recovery.restore_file(filepath)
-            if restore_success:
-                self.stats['files_restored'] += 1
-                print(f"[RECOVERY] ✓ {restore_msg}")
-            else:
-                print(f"[RECOVERY] ✗ {restore_msg}")
-            
-            print(f"{'='*60}\n")
         else:
-            print(f"[WARNING] Failed to kill PID {pid}: {message}")
+            print(f"[THREAT DETECTED] {message}")
+        
+        print(f"File: {filepath}")
+        print(f"Reason: {reason}")
+        
+        # ─── Gap 2: Attempt automatic file restore ───
+        restore_success, restore_msg = self.recovery.restore_file(filepath)
+        if restore_success:
+            self.stats['files_restored'] += 1
+            print(f"[RECOVERY] ✓ {restore_msg}")
+        else:
+            print(f"[RECOVERY] ✗ {restore_msg}")
+        
+        print(f"{'='*60}\n")
     
     def _handle_suspend(self, pid, filepath, reason):
         """Handle SUSPEND decision"""
-        success, message = self.process_manager.suspend_process(pid, reason)
+        if pid is not None:
+            # Race condition check: 500ms delay then re-verify PID
+            still_alive = log_race_condition_check(pid)
+            log_pre_enforcement(pid, 'SUSPEND')
+            if still_alive:
+                success, message = self.process_manager.suspend_process(pid, reason)
+            else:
+                success, message = False, f"Process {pid} exited before enforcement could act"
+        else:
+            success, message = False, "No PID to suspend (unknown process)"
         
+        print(f"\n{'='*60}")
         if success:
             self.stats['processes_suspended'] += 1
-            
-            print(f"\n{'='*60}")
             print(f"[PROCESS SUSPENDED] PID {pid}")
             print(f"File: {filepath}")
             print(f"Reason: {reason}")
             print(f"Action: Use 'guardianx undo {pid}' to resume if false positive")
-            print(f"{'='*60}\n")
         else:
-            print(f"[WARNING] Failed to suspend PID {pid}: {message}")
+            print(f"[THREAT DETECTED] {reason}")
+            print(f"File: {filepath}")
+            print(f"Note: {message}")
+        print(f"{'='*60}\n")
     
     def _log_event(self, pid, filepath, event_type, action, reason):
         """Log non-threatening events for analysis."""
@@ -463,6 +523,7 @@ def main():
     self_defense = SelfDefense()
     
     # Check for admin privileges
+    is_admin = check_admin()
     try:
         import ctypes
         is_admin = ctypes.windll.shell32.IsUserAnAdmin()
