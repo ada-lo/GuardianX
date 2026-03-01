@@ -344,7 +344,7 @@ class ETWFileMonitor:
                         for event in events:
                             self._process_etw_event(event)
                     else:
-                        time.sleep(0.1)  # No events, brief sleep
+                        time.sleep(0.05)  # No events, brief sleep
                 except pywintypes.error:
                     time.sleep(0.2)  # Transient error, retry
                 except Exception as e:

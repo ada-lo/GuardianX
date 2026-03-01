@@ -1,0 +1,241 @@
+2026-02-25 21:13:58 [ENFORCEMENT_DEBUG] INFO: Admin privileges: False
+2026-02-25 21:14:28 [ENFORCEMENT_DEBUG] INFO: Admin privileges: False
+2026-02-25 21:18:41 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:13:37 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.docx
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T21:15:39.106111
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.docx
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\README.txt
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\README.txt'], 'has_corrupted_files': True, 'file_entropy': 7.80024411255489, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 121.73017406463623, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 21:15:39 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:16:52 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.docx
+2026-02-26 21:17:37 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.png
+2026-02-26 21:18:17 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.png
+2026-02-26 21:18:58 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.txt
+2026-02-26 21:19:39 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.jpg
+2026-02-26 21:19:46 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:21:48 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 21:22:34 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 21:23:14 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 21:24:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.png
+2026-02-26 21:24:52 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.png
+2026-02-26 21:25:37 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-02-26 21:26:32 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-02-26 21:27:29 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.txt
+2026-02-26 21:46:29 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T21:47:29.879089
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.789365737861008, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 60.037713289260864, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 21:47:29 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T21:48:07.692699
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 97.85132360458374, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 21:48:07 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T21:48:45.543261
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.jpg
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 135.7018859386444, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 21:48:45 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 21:49:24 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.png
+2026-02-26 22:05:41 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:06:43.513641
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 61.822320222854614, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:06:43 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:07:20.596799
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 98.90547823905945, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:07:20 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:07:57.848432
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 136.15711045265198, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:07:57 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:08:35.942526
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.781940980873788, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 174.25020337104797, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:08:35 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:09:16 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:09:17.651126
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.798794848542806, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 215.95980501174927, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:09:17 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:10:02.792883
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.778310916206952, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 261.1015610694885, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:10:02 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:10:48.572792
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.808131080735987, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': True, 'idle_duration': 306.88147020339966, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:10:48 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:14:24 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:16:16 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:18:39 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:19:13 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 22:19:41 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-02-26T22:22:51.740136
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Decision            : KILL
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected: C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 252.4027669429779, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-02-26 22:22:51 [ENFORCEMENT_DEBUG] INFO: ======================================================================
