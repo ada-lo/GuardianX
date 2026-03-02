@@ -6,6 +6,7 @@ Runs all threat detectors in sequence, merges indicators into
 a single dict that the ProcessManager decision tree consumes.
 """
 
+import time
 import logging
 from pathlib import Path
 
@@ -30,6 +31,8 @@ class ThreatPipeline:
         self.idle_monitor = idle_monitor
         self.adaptive_baseline = adaptive_baseline
         self.evasion_detector = evasion_detector
+        # Ransom note directory cache: dir_path → (notes_list, timestamp)
+        self._ransom_note_cache = {}
 
     def assess(self, pid, filepath, event_type, proc_info=None):
         """
@@ -54,9 +57,14 @@ class ThreatPipeline:
         else:
             indicators['is_known_ransomware'] = False
 
-        # 2. Check for ransom notes
-        parent_dir = Path(filepath).parent
-        ransom_notes = self.signature_checker.scan_directory_for_ransom_notes(parent_dir)
+        # 2. Check for ransom notes (with 30s directory cache)
+        parent_dir = str(Path(filepath).parent)
+        cached = self._ransom_note_cache.get(parent_dir)
+        if cached and time.time() - cached[1] < 30.0:
+            ransom_notes = cached[0]
+        else:
+            ransom_notes = self.signature_checker.scan_directory_for_ransom_notes(parent_dir)
+            self._ransom_note_cache[parent_dir] = (ransom_notes, time.time())
         indicators['ransom_notes_found'] = ransom_notes
 
         # 3. Check magic bytes (file corruption)

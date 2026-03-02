@@ -58,15 +58,15 @@ class ProcessManager:
         info = self.get_process_info(pid) if pid is not None else None
 
         if not info:
-            # No process info — still check file-based threat indicators
+            # No process info — use CONTAIN (quarantine + restore) instead of KILL
             if threat_indicators.get('ransom_notes_found'):
                 notes = ', '.join(threat_indicators['ransom_notes_found'])
-                return ThreatLevel.KILL, f"Ransom notes detected: {notes}"
+                return ThreatLevel.CONTAIN, f"Ransom notes detected (PID unknown): {notes}"
             if threat_indicators.get('has_corrupted_files'):
-                return ThreatLevel.SUSPEND, "File corruption detected (unknown process)"
+                return ThreatLevel.CONTAIN, "File corruption detected (PID unknown)"
             if threat_indicators.get('suspicious_extensions'):
                 exts = ', '.join(threat_indicators['suspicious_extensions'])
-                return ThreatLevel.SUSPEND, f"Suspicious extensions from unknown process: {exts}"
+                return ThreatLevel.CONTAIN, f"Suspicious extensions (PID unknown): {exts}"
             return ThreatLevel.ALLOW, "Unknown process — no file-based threats"
 
         # ─── Check evasion BEFORE whitelist ───

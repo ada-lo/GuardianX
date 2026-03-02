@@ -7,7 +7,9 @@ and integrates all industry-grade defense modules.
 import os
 import sys
 import time
+import queue
 import logging
+import threading
 import psutil
 from pathlib import Path
 from watchdog.observers import Observer
@@ -139,10 +141,29 @@ class GuardianX:
         # File system observer
         self.observer = Observer()
 
+        # ─── Async Worker Queue (Fix 2) ───
+        self._event_queue = queue.Queue(maxsize=5000)
+        self._running = True
+        self._worker_thread = threading.Thread(
+            target=self._worker_loop,
+            daemon=True,
+            name="GuardianX-Worker"
+        )
+
+        # ─── Incident Cooldown (Fix 5) ───
+        # dir_path → timestamp: suppress duplicate alerts for 30s per directory
+        self._incident_cooldown = {}
+        self._cooldown_seconds = 30.0
+
+        # ─── Restore Suppression (Fix 5) ───
+        # filepath → timestamp: ignore watchdog events from our own restores
+        self._recently_restored = {}
+
         # Statistics
         self.stats = {
             'events_processed': 0,
             'threats_detected': 0,
+            'threats_contained': 0,
             'processes_killed': 0,
             'processes_suspended': 0,
             'false_positives_undone': 0,
@@ -172,29 +193,53 @@ class GuardianX:
 
     def analyze_file_event(self, filepath, event_type):
         """
-        Main analysis function called on every file event.
-        Implements the full decision tree with all industry-grade checks.
+        Lightweight callback — backup file and enqueue for worker thread.
+        This runs on the watchdog thread, so it must be fast.
         """
         self.stats['events_processed'] += 1
 
+        # Suppress events triggered by our own file restores
+        fp_norm = os.path.normpath(filepath).lower()
+        restore_ts = self._recently_restored.get(fp_norm)
+        if restore_ts and time.time() - restore_ts < 2.0:
+            return  # Skip — this is our own restore
+
         try:
-            # Backup file BEFORE analysis
+            # Backup file BEFORE analysis (fast I/O, stays on callback thread)
             if event_type in ['modified', 'created']:
                 success, _ = self.recovery.backup_file(filepath)
                 if success:
                     self.stats['files_backed_up'] += 1
 
-            # ETW-based process attribution
-            pid = self.etw_monitor.get_process_for_file(filepath)
+            # Enqueue for worker thread (non-blocking)
+            self._event_queue.put_nowait((filepath, event_type, time.time()))
+        except queue.Full:
+            logger.warning("Event queue full — dropping event")
+        except Exception as e:
+            logger.error(f"Error in file event callback: {e}")
 
-            # Fallback: directory-level PID heuristic
-            if pid is None:
-                pid = self._find_process_in_directory(filepath)
+    def _worker_loop(self):
+        """Worker thread: dequeues events and runs heavy analysis."""
+        logger.info("Analysis worker thread started")
+        while self._running:
+            try:
+                filepath, event_type, recv_time = self._event_queue.get(timeout=1.0)
+                self._process_event(filepath, event_type, recv_time)
+            except queue.Empty:
+                continue
+            except Exception as e:
+                logger.error(f"Worker error: {e}")
+
+    def _process_event(self, filepath, event_type, recv_time):
+        """Heavy analysis — runs on worker thread, not the watchdog callback."""
+        try:
+            # ETW-based process attribution (cache lookup — fast)
+            pid = self.etw_monitor.get_process_for_file(filepath)
 
             if pid is None:
                 log_etw_attribution(filepath)
 
-            # Record event for slow-burn detection (skip if no PID)
+            # Record event for slow-burn detection
             if pid is not None:
                 self.slow_burn.record_event(pid, filepath)
 
@@ -207,24 +252,38 @@ class GuardianX:
                 event_count = len(self.slow_burn.process_events.get(pid, []))
                 self.adaptive_baseline.record_activity(pid, event_count, proc_name)
 
-            # === THREAT ASSESSMENT (via ThreatPipeline) ===
+            # === THREAT ASSESSMENT ===
             threat_indicators = self.pipeline.assess(pid, filepath, event_type, proc_info)
 
             # === DECISION TREE ===
             action, reason = self.process_manager.decide_action(pid, threat_indicators)
 
+            # === INCIDENT COOLDOWN (Fix 5) ===
+            if action in (ThreatLevel.KILL, ThreatLevel.SUSPEND, ThreatLevel.CONTAIN):
+                dir_path = os.path.normpath(Path(filepath).parent).lower()
+                now = time.time()
+                last_alert = self._incident_cooldown.get(dir_path, 0)
+                if now - last_alert < self._cooldown_seconds:
+                    # Suppress duplicate — already alerted for this directory
+                    return
+                self._incident_cooldown[dir_path] = now
+
             # === ENFORCEMENT DIAGNOSTICS ===
-            if action in (ThreatLevel.KILL, ThreatLevel.SUSPEND):
-                action_name = 'KILL' if action == ThreatLevel.KILL else 'SUSPEND'
+            if action in (ThreatLevel.KILL, ThreatLevel.SUSPEND, ThreatLevel.CONTAIN):
+                action_name = {ThreatLevel.KILL: 'KILL', ThreatLevel.SUSPEND: 'SUSPEND',
+                               ThreatLevel.CONTAIN: 'CONTAIN'}.get(action, 'UNKNOWN')
                 log_detection_context(filepath, pid, threat_indicators, action_name, reason)
+                latency = time.time() - recv_time
+                logger.info(f"[TIMING] Detection latency: {latency:.3f}s")
 
             # === TAKE ACTION ===
             if action == ThreatLevel.KILL:
                 self._handle_kill(pid, filepath, reason)
             elif action == ThreatLevel.SUSPEND:
                 self._handle_suspend(pid, filepath, reason)
+            elif action == ThreatLevel.CONTAIN:
+                self._handle_contain(filepath, reason)
             elif action == ThreatLevel.ALLOW:
-                # Log but don't act
                 self._log_event(pid, filepath, event_type, 'ALLOWED', reason)
 
             # Publish event to dashboard
@@ -232,73 +291,6 @@ class GuardianX:
 
         except Exception as e:
             logger.error(f"Exception analyzing {filepath}: {e}")
-
-    def _find_process_in_directory(self, filepath):
-        """
-        Directory-level PID heuristic with caching.
-
-        Uses a short-lived cache to avoid re-scanning all processes on
-        every file event. Cache entries expire after a few seconds.
-        """
-        target_dir = os.path.normpath(Path(filepath).parent).lower()
-
-        # Skip system directories
-        skip_dirs = {'system32', 'syswow64', 'windows', 'program files'}
-        if any(s in target_dir for s in skip_dirs):
-            return None
-
-        now = time.time()
-
-        # Check cache (hits AND misses)
-        if hasattr(self, '_dir_pid_cache'):
-            entry = self._dir_pid_cache.get(target_dir)
-            if entry is not None:
-                pid, ts = entry
-                if now - ts < 5.0:  # Cache hit valid for 5s
-                    return pid  # pid may be None (cached miss)
-        else:
-            self._dir_pid_cache = {}
-
-        # Scan with a 2-second time limit
-        found_pid = None
-        try:
-            deadline = now + 2.0
-            for proc in psutil.process_iter(['pid', 'name']):
-                if time.time() > deadline:
-                    logger.debug("Directory heuristic: scan timed out at 2s")
-                    break
-                try:
-                    pname = proc.info['name'].lower()
-                    if pname in ('system', 'registry', 'smss.exe', 'csrss.exe',
-                                 'svchost.exe', 'explorer.exe', 'searchprotocolhost.exe',
-                                 'msmpeng.exe', 'antimalware service executable'):
-                        continue
-
-                    for item in proc.open_files():
-                        item_dir = os.path.normpath(Path(item.path).parent).lower()
-                        if item_dir == target_dir:
-                            found_pid = proc.info['pid']
-                            logger.info(
-                                f"Directory heuristic: PID {found_pid} "
-                                f"({proc.info['name']}) active in {target_dir}"
-                            )
-                            break
-                    if found_pid:
-                        break
-                except (psutil.AccessDenied, psutil.NoSuchProcess):
-                    continue
-        except Exception:
-            pass
-
-        # Cache the result (including None for misses)
-        self._dir_pid_cache[target_dir] = (found_pid, now)
-
-        # Evict stale cache entries
-        stale = [k for k, (_, ts) in self._dir_pid_cache.items() if now - ts > 10.0]
-        for k in stale:
-            del self._dir_pid_cache[k]
-
-        return found_pid
 
     def _handle_kill(self, pid, filepath, reason):
         """Handle KILL decision — terminate and attempt file restore."""
@@ -329,6 +321,29 @@ class GuardianX:
         restore_success, restore_msg = self.recovery.restore_file(filepath)
         if restore_success:
             self.stats['files_restored'] += 1
+            logger.info(f"[RECOVERY] ✓ {restore_msg}")
+        else:
+            logger.info(f"[RECOVERY] ✗ {restore_msg}")
+
+        logger.warning("=" * 60)
+
+    def _handle_contain(self, filepath, reason):
+        """Handle CONTAIN — threat detected but no PID. Quarantine + restore."""
+        self.stats['threats_detected'] += 1
+        self.stats['threats_contained'] = self.stats.get('threats_contained', 0) + 1
+
+        logger.warning("=" * 60)
+        logger.warning(f"[CONTAINED] Threat detected — PID unknown")
+        logger.warning(f"File: {filepath}")
+        logger.warning(f"Reason: {reason}")
+
+        # Attempt automatic file restore
+        restore_success, restore_msg = self.recovery.restore_file(filepath)
+        if restore_success:
+            self.stats['files_restored'] += 1
+            # Track restore to suppress the watchdog event it will trigger
+            fp_norm = os.path.normpath(filepath).lower()
+            self._recently_restored[fp_norm] = time.time()
             logger.info(f"[RECOVERY] ✓ {restore_msg}")
         else:
             logger.info(f"[RECOVERY] ✗ {restore_msg}")
@@ -371,11 +386,12 @@ class GuardianX:
             action_name = {
                 ThreatLevel.KILL: 'KILL',
                 ThreatLevel.SUSPEND: 'SUSPEND',
+                ThreatLevel.CONTAIN: 'CONTAIN',
                 ThreatLevel.ALLOW: 'ALLOW',
             }.get(action, 'UNKNOWN')
 
             event = {
-                'type': 'threat' if action in [ThreatLevel.KILL, ThreatLevel.SUSPEND] else 'event',
+                'type': 'threat' if action in [ThreatLevel.KILL, ThreatLevel.SUSPEND, ThreatLevel.CONTAIN] else 'event',
                 'pid': pid,
                 'filepath': str(filepath),
                 'event_type': event_type,
@@ -399,6 +415,10 @@ class GuardianX:
         # Start ETW Monitor
         self.etw_monitor.start()
         logger.info(f"Process Attribution: {self.etw_monitor.monitoring_mode}")
+
+        # Start worker thread
+        self._worker_thread.start()
+        logger.info("Analysis worker thread ready")
 
         # Start Dashboard
         if self._dashboard_enabled:
@@ -446,8 +466,10 @@ class GuardianX:
 
         except KeyboardInterrupt:
             logger.info("Shutting down...")
+            self._running = False
             self.observer.stop()
             self.etw_monitor.stop()
+            self._worker_thread.join(timeout=3)
             self.adaptive_baseline.save_profiles()
 
         self.observer.join()
