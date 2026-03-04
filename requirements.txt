@@ -25,6 +25,7 @@ pytest==9.0.2
 pytest-cov==7.0.0
 python-dotenv==1.2.1
 pywin32==311
+pywintrace>=0.2.0
 PyYAML==6.0.3
 six==1.17.0
 starlette==0.52.1

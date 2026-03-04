@@ -248,6 +248,22 @@ class GuardianX:
             proc_name = None
             if pid is not None:
                 proc_info = self.process_manager.get_process_info(pid)
+                
+                # Fallback: if psutil can't find it (process exited), use ETW process cache
+                if proc_info is None:
+                    cached = self.etw_monitor.get_cached_process_info(pid)
+                    if cached:
+                        logger.debug(f"Using ETW process cache for exited PID {pid}: {cached.get('name')}")
+                        proc_info = {
+                            'pid': pid,
+                            'name': cached.get('name', ''),
+                            'exe': cached.get('exe', ''),
+                            'cmdline': cached.get('cmdline', ''),
+                            'is_whitelisted': False,
+                            'signer': None,
+                            'has_window': False,
+                        }
+                
                 proc_name = proc_info['name'] if proc_info else None
                 event_count = len(self.slow_burn.process_events.get(pid, []))
                 self.adaptive_baseline.record_activity(pid, event_count, proc_name)
