@@ -40,6 +40,16 @@ if sys.platform == 'win32':
 
 logger = logging.getLogger("GuardianX.ETW")
 
+# Add file handler for ETW debug diagnostics
+_etw_log_dir = os.path.join(os.environ.get('TEMP', '/tmp'), 'GuardianX', 'logs')
+os.makedirs(_etw_log_dir, exist_ok=True)
+_etw_debug_path = os.path.join(_etw_log_dir, 'etw_debug.log')
+_file_handler = logging.FileHandler(_etw_debug_path, mode='w', encoding='utf-8')
+_file_handler.setLevel(logging.DEBUG)
+_file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+logger.addHandler(_file_handler)
+logger.setLevel(logging.DEBUG)
+
 
 # ─── Kernel Trace Flags ───────────────────────────────────────────────────────
 # These flags tell the NT Kernel Logger which events to deliver.
@@ -396,6 +406,14 @@ class ETWFileMonitor:
                 callback_data_flag=2,  # RETURN_RAW_DATA_ON_ERROR
                 ring_buf_size=256,     # 256 KB per buffer
             )
+            
+            # *** CRITICAL FIX ***
+            # pywintrace does NOT set EnableFlags on EVENT_TRACE_PROPERTIES for kernel traces.
+            # It tries to use EnableTraceEx2, which only works for user-mode providers.
+            # The NT Kernel Logger requires EnableFlags set directly in the properties
+            # structure BEFORE StartTrace is called. Without this, zero user-mode file I/O
+            # events are captured (only system-level events from PID 4 appear).
+            self._etw_job.properties.get().contents.EnableFlags = kernel_flags
             
             self._etw_job.start()
             
