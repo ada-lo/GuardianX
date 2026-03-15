@@ -100,7 +100,9 @@ class GuardianX:
         self.process_manager = process_manager or ProcessManager()
 
         # ─── ETW-Based Process Attribution ───
-        self.etw_monitor = etw_monitor or ETWFileMonitor()
+        # Pass watch_paths so ETW can filter events to monitored directories only
+        etw_roots = [str(p) for p in (watch_paths or self._get_default_watch_paths())]
+        self.etw_monitor = etw_monitor or ETWFileMonitor(monitored_roots=etw_roots)
         logger.info("ETW Monitor initialized")
 
         # ─── File Recovery Manager ───
@@ -337,6 +339,9 @@ class GuardianX:
         restore_success, restore_msg = self.recovery.restore_file(filepath)
         if restore_success:
             self.stats['files_restored'] += 1
+            # Suppress watchdog retrigger from our own restore (same as _handle_contain)
+            fp_norm = os.path.normpath(filepath).lower()
+            self._recently_restored[fp_norm] = time.time()
             logger.info(f"[RECOVERY] ✓ {restore_msg}")
         else:
             logger.info(f"[RECOVERY] ✗ {restore_msg}")

@@ -241,7 +241,7 @@ class SelfDefense:
             
             # Spawn watchdog process
             python_exe = sys.executable
-            main_script = str(Path(__file__).parent / 'main.py')
+            main_script = str(Path(__file__).resolve().parent.parent.parent / 'run.py')
             
             CREATE_NO_WINDOW = 0x08000000  # subprocess.CREATE_NO_WINDOW
             wp = subprocess.Popen(
@@ -270,7 +270,7 @@ class SelfDefense:
     def _get_watchdog_script(self):
         """Generate the watchdog Python script as a string."""
         heartbeat_path = str(self._heartbeat_file).replace('\\', '\\\\')
-        main_script = str(Path(__file__).parent / 'main.py').replace('\\', '\\\\')
+        main_script = str(Path(__file__).resolve().parent.parent.parent / 'run.py').replace('\\', '\\\\')
         python_exe = sys.executable.replace('\\', '\\\\')
         
         return f'''

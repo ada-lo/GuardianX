@@ -129,7 +129,7 @@ File Event → Get Modifying Process → Run Detectors → Decision Tree → Act
 
 ```bash
 # Run with default settings (monitors Documents, Desktop, Downloads)
-python main.py
+python run.py
 ```
 
 **Output:**
@@ -171,7 +171,7 @@ python test_attack.py
 
 **Terminal 1:**
 ```bash
-python main.py
+python run.py
 ```
 
 **Terminal 2:**

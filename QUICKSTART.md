@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 **Terminal 1 - Start Protection:**
 ```bash
-python main.py
+python run.py
 ```
 
 **Terminal 2 - Run Attack Simulation:**
@@ -143,7 +143,7 @@ python test_attack.py
 **Solution**: Run PowerShell as Administrator
 ```bash
 # Right-click PowerShell → Run as Administrator
-python main.py
+python run.py
 ```
 
 ### Too many false positives

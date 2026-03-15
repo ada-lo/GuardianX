@@ -249,8 +249,16 @@ def _read_log_file(log_type):
     log_path = log_dir / filename
     try:
         if log_path.exists():
-            with open(log_path, 'r') as f:
-                return json.load(f)
+            results = []
+            with open(log_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            results.append(json.loads(line))
+                        except json.JSONDecodeError:
+                            continue
+            return results
     except Exception:
         pass
     return []

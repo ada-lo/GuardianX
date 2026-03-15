@@ -26,7 +26,7 @@ import logging
 import subprocess
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Optional, DefaultDict, Dict, Tuple, Set, Any
+from typing import Optional, DefaultDict, Dict, List, Tuple, Set, Any
 
 if sys.platform == 'win32':
     try:
@@ -69,7 +69,7 @@ SYSMON_FILE_DELETE_DETECTED = 26
 # File I/O opcode IDs (kernel trace opcodes, NOT the Analytic channel EventIDs)
 FILEIO_CREATE     = 64    # FileIo_Create
 FILEIO_CLEANUP    = 65    # FileIo_Cleanup
-FILEIO_CLOSE      = 66    # FileIo_Close
+FILEIO_CLOSE      = 76    # File close
 FILEIO_READ       = 67    # FileIo_Read
 FILEIO_WRITE      = 68    # FileIo_Write
 FILEIO_SETINFO    = 69    # FileIo_SetInfo
@@ -99,6 +99,35 @@ class FileIOEvent:
         return f"FileIOEvent(pid={self.pid}, type={self.event_type}, file={self.filepath})"
 
 
+# ─── EDR Filter Constants ─────────────────────────────────────────────────────
+# Stage 1: Only these opcodes represent file mutations we care about
+WRITE_OPCODES = frozenset({
+    FILEIO_CREATE, FILEIO_FILECREATE,
+    FILEIO_WRITE, FILEIO_SETINFO,
+    FILEIO_DELETE, FILEIO_FILEDELETE,
+    FILEIO_RENAME,
+})
+
+# Stage 4: Skip these file extensions (noise, not ransomware targets)
+IGNORE_EXTENSIONS = frozenset({
+    '.tmp', '.log', '.cache', '.dat', '.db', '.etl', '.pf',
+    '.lock', '.ldb', '.manifest', '.mui', '.nls',
+})
+
+# Stage 5: System processes that generate massive file I/O but aren't threats
+IGNORE_PROCESSES = frozenset({
+    'system', 'svchost.exe', 'explorer.exe', 'searchindexer.exe',
+    'msmpeng.exe', 'mpdefendercoreservice.exe', 'nissrv.exe',
+    'searchprotocolhost.exe', 'searchfilterhost.exe',
+    'audiodg.exe', 'dwm.exe', 'csrss.exe', 'smss.exe',
+    'lsass.exe', 'services.exe', 'wininit.exe', 'winlogon.exe',
+    'spoolsv.exe', 'taskhostw.exe', 'runtimebroker.exe',
+    'dllhost.exe', 'conhost.exe', 'fontdrvhost.exe',
+    'mpcmdrun.exe', 'securityhealthservice.exe',
+    'antigravity.exe',
+})
+
+
 class ETWFileMonitor:
     """
     Monitors file I/O operations at the kernel level using a real-time
@@ -114,7 +143,8 @@ class ETWFileMonitor:
         a dedicated ProcessTrace thread — zero polling, microsecond latency.
     """
     
-    def __init__(self, max_queue_size: int = 10000) -> None:
+    def __init__(self, max_queue_size: int = 10000,
+                 monitored_roots: Optional[List[str]] = None) -> None:
         self.event_queue: queue.Queue[FileIOEvent] = queue.Queue(maxsize=max_queue_size)
         self._running: bool = False
         self._thread: Optional[threading.Thread] = None
@@ -127,6 +157,20 @@ class ETWFileMonitor:
         # Synchronization events for thread startup
         self._startup_event = threading.Event()
         self._startup_error: Optional[str] = None
+        
+        # ─── EDR Filter Stage 3: Monitored directory roots ───
+        # Only events under these directories pass through to the detection engine
+        if monitored_roots:
+            self._monitored_roots = tuple(
+                os.path.normpath(p).lower() for p in monitored_roots
+            )
+        else:
+            # Default: common user directories
+            user = os.path.expanduser('~')
+            self._monitored_roots = tuple(
+                os.path.normpath(os.path.join(user, d)).lower()
+                for d in ('Documents', 'Desktop', 'Downloads', 'Pictures', 'Videos')
+            )
         
         # Recent file→PID mapping cache (filepath → (pid, timestamp))
         self._file_pid_cache: Dict[str, Tuple[int, float]] = {}
@@ -150,10 +194,13 @@ class ETWFileMonitor:
         # Volume device path → drive letter mapping for ETW path normalization
         self._volume_map: Dict[str, str] = self._build_volume_map()
         
-        # Stats
+        # ─── Stats ───
         self._events_received = 0
+        self._events_filtered = 0  # Dropped by filter pipeline
+        self._events_passed = 0    # Reached detection queue
         self._cache_hits = 0
         self._cache_misses = 0
+        self._last_stats_time = time.time()
         
         logger.info("ETW File Monitor v3.0 initialized (kernel trace mode)")
 
@@ -514,97 +561,121 @@ class ETWFileMonitor:
     
     def _handle_fileio_event(self, event_data, pid, opcode):
         """
-        Process a FileIO event — update file→PID and FileObject→FileName caches.
+        EDR-style 5-stage filtering pipeline for FileIO events.
         
-        Kernel FileIO architecture:
-          - Create events (opcode 64) contain 'OpenPath' with the full file path
-          - Name events (opcode 0, 32, 36) contain 'FileName' → maps FileObject to path
-          - Write/Delete/Rename events only contain 'FileObject' pointer, no filename
-          
-        We build a FileObject→FileName cache from Create/Name events, then use it
-        to resolve filenames for write/delete/rename events.
+        Pipeline stages (fastest checks first):
+          1. Opcode filter   — integer set lookup     (nanoseconds)
+          2. PID filter      — integer comparison      (nanoseconds)
+          3. Directory filter — string prefix match     (microseconds)
+          4. Extension filter — set lookup              (nanoseconds)
+          5. Process filter  — set lookup               (nanoseconds)
+        
+        FileObject→FileName cache is built for ALL Create/Name events
+        (even filtered ones) because write events need it later.
         """
         try:
-            # ─── Step 1: Extract file path (varies by event type) ───
-            filepath = None
+            # ─── Always build FileObject→FileName cache ───
+            # This must happen for ALL creates, even filtered ones,
+            # because later write/delete events reference FileObject pointers
             file_object = event_data.get('FileObject', '')
             file_object_key = str(file_object) if file_object else ''
+            filepath = None
             
-            # Create events (opcode 64) — have 'OpenPath' with full NT device path
             if opcode == FILEIO_CREATE:
                 filepath = event_data.get('OpenPath', '')
-                # Cache FileObject → FileName for future lookups
                 if filepath and file_object_key:
                     normalized = self._normalize_etw_path(filepath)
                     with self._fileobj_lock:
                         self._fileobj_cache[file_object_key] = normalized
-            
-            # Name events (opcode 0, 32, 36) — have 'FileName'
             elif opcode in (FILEIO_NAME, FILEIO_FILECREATE, FILEIO_FILERUNDOWN):
                 filepath = event_data.get('FileName', '')
-                # Cache FileObject → FileName
                 if filepath and file_object_key:
                     normalized = self._normalize_etw_path(filepath)
                     with self._fileobj_lock:
                         self._fileobj_cache[file_object_key] = normalized
             
-            # All other events — try parsed 'FileName', then FileObject cache
-            else:
+            # ═══ STAGE 1: Opcode filter (mutation events only) ═══
+            if opcode not in WRITE_OPCODES:
+                self._events_filtered += 1
+                return
+            
+            # ═══ STAGE 2: PID filter (skip System/Idle) ═══
+            if pid in (0, 4, 0xFFFFFFFF):
+                self._events_filtered += 1
+                return
+            
+            # ─── Resolve filepath for non-Create events ───
+            if filepath is None:
                 filepath = event_data.get('FileName') or event_data.get('OpenPath')
                 if not filepath and file_object_key:
-                    # Look up FileObject in our cache
                     with self._fileobj_lock:
                         filepath = self._fileobj_cache.get(file_object_key)
             
             if not filepath or not isinstance(filepath, str):
+                self._events_filtered += 1
                 return
             
-            # ─── Step 2: Normalize and determine event type ───
             filepath = self._normalize_etw_path(filepath)
+            filepath_lower = filepath.lower()
             
-            # Map opcodes to event types we care about for PID attribution
-            opcode_map = {
-                FILEIO_CREATE: 'created',
-                FILEIO_FILECREATE: 'created',
-                FILEIO_WRITE: 'modified',
-                FILEIO_SETINFO: 'modified',
-                FILEIO_DELETE: 'deleted',
-                FILEIO_FILEDELETE: 'deleted',
-                FILEIO_RENAME: 'renamed',
-                FILEIO_CLEANUP: 'cleanup',
-                FILEIO_CLOSE: 'closed',
-            }
-            
-            event_type = opcode_map.get(opcode)
-            if not event_type:
-                return  # Not a file event we track
-            
-            # Skip PID 0 and PID 4 (System) for file attribution
-            if pid in (0, 4):
+            # ═══ STAGE 3: Directory filter (monitored roots only) ═══
+            if not filepath_lower.startswith(self._monitored_roots):
+                self._events_filtered += 1
                 return
             
-            # Only cache write-related events (these are what watchdog will see)
-            if event_type in ('created', 'modified', 'deleted', 'renamed'):
-                # Debug: log Desktop/test events for PID attribution diagnostics
-                if 'guardianx_test' in filepath.lower() or 'desktop' in filepath.lower():
+            # ═══ STAGE 4: Extension filter (skip noise) ═══
+            ext = os.path.splitext(filepath_lower)[1]
+            if ext in IGNORE_EXTENSIONS:
+                self._events_filtered += 1
+                return
+            
+            # ═══ STAGE 5: Process whitelist (skip known-safe) ═══
+            proc_name = None
+            with self._process_cache_lock:
+                proc_info = self._process_cache.get(pid)
+                if proc_info:
+                    proc_name = proc_info.get('name', '').lower()
+            if proc_name and proc_name in IGNORE_PROCESSES:
+                self._events_filtered += 1
+                return
+            
+            # ─── All filters passed — this event matters ───
+            self._events_passed += 1
+            
+            # Map opcode to event type
+            opcode_map = {
+                FILEIO_CREATE: 'created', FILEIO_FILECREATE: 'created',
+                FILEIO_WRITE: 'modified', FILEIO_SETINFO: 'modified',
+                FILEIO_DELETE: 'deleted', FILEIO_FILEDELETE: 'deleted',
+                FILEIO_RENAME: 'renamed',
+            }
+            event_type = opcode_map.get(opcode, 'modified')
+            
+            # Update PID cache
+            self._update_cache(filepath, pid)
+            
+            # Enqueue for detection engine
+            try:
+                self.event_queue.put_nowait(FileIOEvent(
+                    pid=pid, filepath=filepath, event_type=event_type,
+                ))
+            except queue.Full:
+                pass
+            
+            # ─── Periodic stats (every 30s) ───
+            now = time.time()
+            if now - self._last_stats_time > 30.0:
+                self._last_stats_time = now
+                total = self._events_filtered + self._events_passed
+                if total > 0:
+                    pct = (self._events_filtered / total) * 100
                     logger.info(
-                        f"[ETW-DEBUG] {event_type.upper()} opcode={opcode} PID={pid} "
-                        f"file={os.path.basename(filepath)} "
-                        f"key={os.path.normpath(filepath).lower()[-60:]}"
+                        f"[ETW Pipeline] {total:,} events | "
+                        f"{self._events_passed:,} passed ({100-pct:.0f}%) | "
+                        f"{self._events_filtered:,} filtered ({pct:.0f}%) | "
+                        f"cache: {len(self._file_pid_cache)} file→PID, "
+                        f"{len(self._fileobj_cache)} FileObj"
                     )
-                self._update_cache(filepath, pid)
-                
-                # Create FileIOEvent and add to queue
-                file_event = FileIOEvent(
-                    pid=pid,
-                    filepath=filepath,
-                    event_type=event_type,
-                )
-                
-                try:
-                    self.event_queue.put_nowait(file_event)
-                except queue.Full:
-                    pass  # Drop if queue is full
                 
         except Exception as e:
             logger.debug(f"FileIO event handling error: {e}")

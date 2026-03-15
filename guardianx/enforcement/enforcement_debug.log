@@ -1188,3 +1188,230 @@
 2026-03-02 13:03:33 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_019.pdf
 2026-03-02 13:03:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
 2026-03-02 13:03:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:05:06 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:25:39 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-03-05T10:26:35.784900
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Decision            : CONTAIN
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected (PID unknown): C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 56.014461278915405, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_005.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_006.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_007.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_008.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_013.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_014.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_016.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_017.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_018.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_019.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_020.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_021.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_022.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_023.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_024.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_025.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_026.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_027.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_028.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_029.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_030.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_031.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_032.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_033.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_034.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_035.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_036.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_037.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_038.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_039.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_040.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_041.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_042.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_043.pdf
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_044.jpg
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_045.docx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_046.png
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_047.xlsx
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_048.txt
+2026-03-05 10:26:35 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_049.pdf
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-03-05T10:27:06.627173
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Decision            : CONTAIN
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected (PID unknown): C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 86.85673451423645, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:27:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:27:24 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 10:27:24 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 10:27:26 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 10:27:26 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 10:27:28 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 10:27:28 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 10:27:30 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 10:27:30 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 10:27:32 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_013.pdf
+2026-03-05 10:27:32 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_013.pdf
+2026-03-05 10:27:34 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_014.jpg
+2026-03-05 10:27:34 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_014.jpg
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-03-05T10:27:36.647536
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 1.00
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Decision            : CONTAIN
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected (PID unknown): C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': True, 'file_entropy': 7.819885956236594, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 116.87709736824036, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:27:36 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 10:38:41 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-03-05T10:38:56.700471
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Decision            : CONTAIN
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected (PID unknown): C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 15.384930849075317, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-03-05 10:38:56 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_005.xlsx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_005.xlsx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_006.txt
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_006.txt
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_007.pdf
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_007.pdf
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_008.jpg
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_008.jpg
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 10:38:57 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 11:31:56 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO: DETECTION CONTEXT
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Timestamp           : 2026-03-05T11:33:06.374691
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   File path           : C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Detected PID        : None
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Process name        : <unknown>
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Parent PID          : None
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Parent process name : <unknown>
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   PID exists now      : False
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Process still running: False
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Threat score        : 0.90
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Admin privileges    : True
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Decision            : CONTAIN
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Reason              : Ransom notes detected (PID unknown): C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO:   Indicators          : {'is_known_ransomware': False, 'ransom_notes_found': ['C:\\Users\\Adarsh\\Desktop\\GuardianX_Test\\DECRYPT_INSTRUCTIONS.txt'], 'has_corrupted_files': False, 'high_file_rate': False, 'file_count': 0, 'dynamic_threshold': 0, 'suspicious_extensions': [], 'is_user_idle': False, 'idle_duration': 0.031, 'evasion_score': 0.0, 'evasion_indicators': [], 'evasion_override_whitelist': False}
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] INFO: ======================================================================
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\DECRYPT_INSTRUCTIONS.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_000.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_001.pdf
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_002.jpg
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_003.docx
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_004.png
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_005.xlsx
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_006.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_006.txt
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_007.pdf
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_007.pdf
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_008.jpg
+2026-03-05 11:33:06 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_008.jpg
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_009.docx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_010.png
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_011.xlsx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_012.txt
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_013.pdf
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_013.pdf
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_014.jpg
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_014.jpg
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_015.docx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_016.png
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_016.png
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_017.xlsx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_017.xlsx
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_018.txt
+2026-03-05 11:33:07 [ENFORCEMENT_DEBUG] WARNING: Attribution failed: No PID found for file event — C:\Users\Adarsh\Desktop\GuardianX_Test\document_018.txt
+2026-03-11 11:04:47 [ENFORCEMENT_DEBUG] INFO: Admin privileges: True

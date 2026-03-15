@@ -141,7 +141,7 @@ info['has_window'] = True  # → Lower threat level
 
 **Terminal 1:**
 ```bash
-python main.py
+python run.py
 ```
 
 **Terminal 2:**

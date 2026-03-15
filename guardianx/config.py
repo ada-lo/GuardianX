@@ -101,8 +101,8 @@ WHITELISTED_PROCESSES = [
     'firefox.exe',
     'notepad.exe',
     'Code.exe',         # VS Code
-    'devenv.exe',       # Visual Studio   
-    'powershell.exe',   # Be careful with this!
+    'devenv.exe',       # Visual Studio
+    # NOTE: powershell.exe intentionally NOT whitelisted — commonly abused by ransomware
 ]
 
 # === LOGGING ===

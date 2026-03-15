@@ -131,9 +131,14 @@ def view_logs(log_type='all', limit=20):
     for log_file in files_to_read:
         if log_file.exists():
             try:
-                with open(log_file, 'r') as f:
-                    entries = json.load(f)
-                    all_entries.extend(entries)
+                with open(log_file, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                all_entries.append(json.loads(line))
+                            except json.JSONDecodeError:
+                                continue
             except Exception as e:
                 print(f"Error reading {log_file}: {e}")
 

@@ -32,6 +32,54 @@ class ProcessManager:
         self.inspector = inspector or ProcessInspector(self.whitelist)
         self.suspended_processes = {}  # pid -> {info, reason, timestamp}
         self.killed_processes = []     # List of killed process info
+        
+        # Restore suspended state from disk (Fix 2: persistent across processes)
+        self._load_suspended_from_disk()
+
+    def _load_suspended_from_disk(self):
+        """Load suspended process state from SUSPEND_LOG (JSONL).
+        
+        Builds net state: SUSPEND entries add PIDs, RESUME entries remove them.
+        Then verifies each PID is still alive and suspended via psutil.
+        """
+        if not SUSPEND_LOG.exists():
+            return
+        
+        # Build net suspended set from log
+        suspended_map = {}  # pid -> last entry
+        try:
+            with open(SUSPEND_LOG, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                        pid = entry.get('pid')
+                        action = entry.get('action')
+                        if pid is None:
+                            continue
+                        if action == 'SUSPEND':
+                            suspended_map[pid] = entry
+                        elif action == 'RESUME':
+                            suspended_map.pop(pid, None)
+                    except (json.JSONDecodeError, KeyError):
+                        continue
+        except Exception:
+            return
+        
+        # Verify each PID is still alive and suspended
+        for pid, entry in suspended_map.items():
+            try:
+                proc = psutil.Process(pid)
+                if proc.status() == psutil.STATUS_STOPPED:
+                    self.suspended_processes[pid] = {
+                        'info': {'name': proc.name(), 'pid': pid},
+                        'reason': entry.get('reason', 'Loaded from disk'),
+                        'timestamp': entry.get('timestamp', ''),
+                    }
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
 
     def get_process_info(self, pid):
         """Delegate to ProcessInspector."""
@@ -221,7 +269,7 @@ class ProcessManager:
             return False, f"Failed to kill {pid}: {e}"
 
     def _log_action(self, action, pid, reason):
-        """Log action to JSON file"""
+        """Log action to JSONL file (one JSON object per line — append-safe)."""
         log_entry = {
             'timestamp': datetime.now().isoformat(),
             'action': action,
@@ -237,34 +285,32 @@ class ProcessManager:
         else:
             log_file = ACTIVITY_LOG
 
-        # Read existing logs
+        # Atomic append — no read-modify-write race
         try:
-            if log_file.exists():
-                with open(log_file, 'r') as f:
-                    logs = json.load(f)
-            else:
-                logs = []
-        except Exception:
-            logs = []
-
-        # Append new entry
-        logs.append(log_entry)
-
-        # Write back
-        with open(log_file, 'w') as f:
-            json.dump(logs, f, indent=2)
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(log_entry) + '\n')
+        except Exception as e:
+            import logging
+            logging.getLogger("GuardianX").debug(f"Log write failed: {e}")
 
     def get_suspended_processes(self):
         """Get list of currently suspended processes for UI/undo"""
         return list(self.suspended_processes.items())
 
     def get_threat_log(self, limit=50):
-        """Retrieve recent threat detections"""
+        """Retrieve recent threat detections from JSONL log."""
         try:
             if THREAT_LOG.exists():
-                with open(THREAT_LOG, 'r') as f:
-                    logs = json.load(f)
-                    return logs[-limit:]  # Return last N entries
+                logs = []
+                with open(THREAT_LOG, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            try:
+                                logs.append(json.loads(line))
+                            except json.JSONDecodeError:
+                                continue
+                return logs[-limit:]
         except Exception:
             pass
 

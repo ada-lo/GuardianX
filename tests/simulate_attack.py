@@ -240,8 +240,7 @@ Commands:
 
     if cmd == "setup":
         create_test_files(50)
-        print("\n  Now start GuardianX (python run.py) and wait ~15s,")
-        print("  then run: python tests/simulate_attack.py attack")
+       
 
     elif cmd == "attack":
         if not TEST_DIR.exists():
